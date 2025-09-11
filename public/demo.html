@@ -683,13 +683,18 @@
                 <i class="fas fa-user-md"></i>
                 <span data-translate="app_name">HealthBridge</span>
             </div>
-            <div class="language-switcher">
-                <label for="language-select" class="sr-only">Select Language</label>
-                <select id="language-select" onchange="changeLanguage(this.value)">
-                    <option value="en">English</option>
-                    <option value="hi">हिंदी (Hindi)</option>
-                    <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
-                </select>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div class="language-switcher">
+                    <label for="language-select" class="sr-only">Select Language</label>
+                    <select id="language-select" onchange="changeLanguage(this.value)">
+                        <option value="en">English</option>
+                        <option value="hi">हिंदी (Hindi)</option>
+                        <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+                    </select>
+                </div>
+                <button id="logoutBtn" onclick="logoutPatient()" style="display: none; padding: 8px 16px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 20px; font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.2s;">
+                    <i class="fas fa-sign-out-alt"></i> <span data-translate="logout">Logout</span>
+                </button>
             </div>
         </div>
     </div>
@@ -780,6 +785,7 @@
                 logged_in_patient: "Logged in Patient",
                 patient_session: "Patient Session",
                 login_time: "Login Time",
+                logout: "Logout",
                 age: "Age",
                 gender: "Gender",
                 weight: "Weight (kg)",
@@ -865,6 +871,7 @@
                 logged_in_patient: "लॉग इन मरीज़",
                 patient_session: "मरीज़ सेशन",
                 login_time: "लॉग इन समय",
+                logout: "लॉग आउट",
                 age: "उम्र",
                 gender: "लिंग",
                 weight: "वजन (किलो)",
@@ -947,6 +954,10 @@
                 page_subtitle: "ਬੁੱਧੀਮਾਨ ਲੱਛਣ ਵਿਸ਼ਲੇਸ਼ਣ ਅਤੇ ਦਵਾਈ ਦੀਆਂ ਸਿਫ਼ਾਰਿਸ਼ਾਂ",
                 patient_info: "ਮਰੀਜ਼ ਦੀ ਜਾਣਕਾਰੀ",
                 patient_name: "ਮਰੀਜ਼ ਦਾ ਨਾਮ",
+                logged_in_patient: "ਲਾਗ ਇਨ ਮਰੀਜ਼",
+                patient_session: "ਮਰੀਜ਼ ਸੈਸ਼ਨ",
+                login_time: "ਲਾਗ ਇਨ ਸਮਾਂ",
+                logout: "ਲਾਗ ਆਊਟ",
                 age: "ਉਮਰ",
                 gender: "ਲਿੰਗ",
                 weight: "ਭਾਰ (ਕਿਲੋ)",
@@ -1623,6 +1634,9 @@
                         // Show patient session info in header
                         showPatientSessionInfo(patient, sessionData.loginTime);
                         
+                        // Show logout button
+                        updateLogoutButton();
+                        
                         console.log('✅ Patient data loading completed successfully');
                     } else {
                         console.log('❌ No patient object found in session data');
@@ -1735,6 +1749,36 @@
             setTimeout(() => {
                 loadPatientData();
             }, 100);
+        }
+        
+        // Logout function
+        function logoutPatient() {
+            if (confirm('Are you sure you want to logout? You will be redirected to the main application.')) {
+                console.log('🚪 Patient logout initiated...');
+                
+                // Clear patient session
+                localStorage.removeItem('patientSession');
+                
+                // Show logout message
+                alert('You have been logged out successfully.');
+                
+                // Redirect to main application
+                window.location.href = '/';
+            }
+        }
+        
+        // Show logout button if patient is logged in
+        function updateLogoutButton() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            const patientSession = localStorage.getItem('patientSession');
+            
+            if (logoutBtn) {
+                if (patientSession) {
+                    logoutBtn.style.display = 'block';
+                } else {
+                    logoutBtn.style.display = 'none';
+                }
+            }
         }
     </script>
 </body>
