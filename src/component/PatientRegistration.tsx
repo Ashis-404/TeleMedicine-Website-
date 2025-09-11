@@ -1,33 +1,68 @@
 import { useState } from 'react';
-import { Eye, EyeOff, User, Mail, Phone, MapPin, Calendar, Heart, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import { patientService, PatientRegistrationData } from '../services/indexedDBPatientService';
+import { patientService } from '../services/indexedDBPatientService';
+import { 
+  User, 
+  Mail, 
+  Phone, 
+  Calendar, 
+  MapPin, 
+  Heart, 
+  Eye, 
+  EyeOff, 
+  Loader,
+  CheckCircle,
+  AlertCircle
+} from 'lucide-react';
 
 interface PatientRegistrationProps {
   onNavigateToSignIn: () => void;
   onBackToHome: () => void;
 }
 
-export default function PatientRegistration({ onNavigateToSignIn, onBackToHome }: PatientRegistrationProps) {
-  const { t, language } = useLanguage();
+interface FormData {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  gender: string;
+  email: string;
+  phone: string;
+  village: string;
+  address: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  password: string;
+  confirmPassword: string;
+}
+
+interface RegistrationStatus {
+  type: 'success' | 'error' | null;
+  message: string;
+  medicalRecordNumber?: string;
+}
+
+export const PatientRegistration: React.FC<PatientRegistrationProps> = ({ 
+  onNavigateToSignIn, 
+  onBackToHome 
+}) => {
+  const { t } = useLanguage();
+  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [registrationStatus, setRegistrationStatus] = useState<{
-    type: 'success' | 'error' | null;
-    message: string;
-    medicalRecordNumber?: string;
-  }>({ type: null, message: '' });
-  
-  const [formData, setFormData] = useState({
+  const [registrationStatus, setRegistrationStatus] = useState<RegistrationStatus>({
+    type: null,
+    message: ''
+  });
+
+  const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
-    email: '',
-    phone: '',
     dateOfBirth: '',
     gender: '',
-    address: '',
+    email: '',
+    phone: '',
     village: '',
+    address: '',
     emergencyContact: '',
     emergencyPhone: '',
     password: '',
@@ -37,69 +72,58 @@ export default function PatientRegistration({ onNavigateToSignIn, onBackToHome }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Reset status
-    setRegistrationStatus({ type: null, message: '' });
-
-    // Validate password match
+    // Password validation
     if (formData.password !== formData.confirmPassword) {
       setRegistrationStatus({
         type: 'error',
-        message: t('passwordMismatch')
+        message: t('passwordsDoNotMatch')
       });
       return;
     }
 
-    // Validate required fields
-    const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'dateOfBirth', 'gender', 'address', 'village', 'emergencyContact', 'emergencyPhone', 'password'];
-    const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
-    
-    if (missingFields.length > 0) {
+    if (formData.password.length < 6) {
       setRegistrationStatus({
         type: 'error',
-        message: 'Please fill in all required fields'
+        message: t('passwordTooShort')
       });
       return;
     }
 
     setIsLoading(true);
+    setRegistrationStatus({ type: null, message: '' });
 
     try {
-      // Prepare registration data
-      const registrationData: PatientRegistrationData = {
+      const result = await patientService.registerPatient({
         firstName: formData.firstName,
         lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
         dateOfBirth: formData.dateOfBirth,
         gender: formData.gender as 'male' | 'female' | 'other',
-        address: formData.address,
+        email: formData.email,
+        phone: formData.phone,
         village: formData.village,
+        address: formData.address,
         emergencyContact: formData.emergencyContact,
         emergencyPhone: formData.emergencyPhone,
-        password: formData.password,
-        preferredLanguage: language as 'en' | 'hi' | 'pa'
-      };
-
-      // Register patient
-      const result = await patientService.registerPatient(registrationData);
+        password: formData.password
+      });
 
       if (result.success) {
         setRegistrationStatus({
           type: 'success',
-          message: `Registration successful! Your Medical Record Number is: ${result.medicalRecordNumber}`,
+          message: `${t('registrationSuccessful')} ${t('redirectingToSignIn')}`,
           medicalRecordNumber: result.medicalRecordNumber
         });
 
-        // Clear form
+        // Reset form
         setFormData({
           firstName: '',
           lastName: '',
-          email: '',
-          phone: '',
           dateOfBirth: '',
           gender: '',
-          address: '',
+          email: '',
+          phone: '',
           village: '',
+          address: '',
           emergencyContact: '',
           emergencyPhone: '',
           password: '',
@@ -128,7 +152,7 @@ export default function PatientRegistration({ onNavigateToSignIn, onBackToHome }
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -161,380 +185,395 @@ export default function PatientRegistration({ onNavigateToSignIn, onBackToHome }
       </header>
 
       {/* Main Content */}
-      <div className="py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-xl p-8">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                {t('patientRegistration')}
-              </h2>
-              <p className="text-gray-600">
+      <div className="py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            {/* Header Section */}
+            <div className="bg-gradient-to-r from-blue-500 to-green-500 px-8 py-6 text-white text-center">
+              <div className="flex items-center justify-center mb-2">
+                <Heart className="h-8 w-8 mr-3" />
+                <h2 className="text-2xl font-bold">
+                  {t('patientRegistration')}
+                </h2>
+              </div>
+              <p className="text-blue-100 text-lg">
                 {t('registrationDescription')}
               </p>
+              <div className="mt-4 text-sm text-blue-100">
+                <p>📝 {t('simpleFormInstruction')}</p>
+              </div>
             </div>
 
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              {/* Status Message */}
-              {registrationStatus.type && (
-                <div className={`p-4 rounded-lg flex items-center space-x-2 ${
-                  registrationStatus.type === 'success' 
-                    ? 'bg-green-50 text-green-800 border border-green-200' 
-                    : 'bg-red-50 text-red-800 border border-red-200'
-                }`}>
-                  {registrationStatus.type === 'success' ? (
-                    <CheckCircle className="h-5 w-5 flex-shrink-0" />
-                  ) : (
-                    <AlertCircle className="h-5 w-5 flex-shrink-0" />
-                  )}
-                  <div>
-                    <p className="font-medium">{registrationStatus.message}</p>
-                    {registrationStatus.medicalRecordNumber && (
-                      <p className="text-sm mt-1">
-                        Please save your Medical Record Number for future reference.
-                      </p>
+            <div className="p-8">
+              <form className="space-y-8" onSubmit={handleSubmit}>
+                {/* Status Message */}
+                {registrationStatus.type && (
+                  <div className={`p-6 rounded-xl flex items-start space-x-4 text-lg ${
+                    registrationStatus.type === 'success' 
+                      ? 'bg-green-50 text-green-800 border-2 border-green-200' 
+                      : 'bg-red-50 text-red-800 border-2 border-red-200'
+                  }`}>
+                    {registrationStatus.type === 'success' ? (
+                      <CheckCircle className="h-6 w-6 flex-shrink-0 mt-1" />
+                    ) : (
+                      <AlertCircle className="h-6 w-6 flex-shrink-0 mt-1" />
                     )}
+                    <div>
+                      <p className="font-semibold">{registrationStatus.message}</p>
+                      {registrationStatus.medicalRecordNumber && (
+                        <p className="text-base mt-2 font-medium bg-white px-3 py-2 rounded border">
+                          📋 {t('yourMedicalRecordNumber')}: <span className="text-blue-600">{registrationStatus.medicalRecordNumber}</span>
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
-              {/* Personal Information */}
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
-                  {t('personalInformation')}
-                </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-                      {t('firstName')}
-                    </label>
-                    <input
-                      id="firstName"
-                      name="firstName"
-                      type="text"
-                      required
-                      className="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder={t('enterFirstName')}
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                    />
-                  </div>
+                )}
 
-                  <div>
-                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                      {t('lastName')}
-                    </label>
-                    <input
-                      id="lastName"
-                      name="lastName"
-                      type="text"
-                      required
-                      className="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder={t('enterLastName')}
-                      value={formData.lastName}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 mb-2">
-                      {t('dateOfBirth')}
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Calendar className="h-5 w-5 text-gray-400" />
+                {/* Step 1: Basic Information */}
+                <div className="bg-blue-50 rounded-xl p-6 border-l-4 border-blue-500">
+                  <h3 className="text-xl font-bold text-blue-900 mb-6 flex items-center">
+                    <User className="h-6 w-6 mr-3" />
+                    1️⃣ {t('basicInformation')}
+                  </h3>
+                  
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div>
+                        <label htmlFor="firstName" className="block text-lg font-semibold text-gray-800 mb-3">
+                          👤 {t('firstName')} <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          id="firstName"
+                          name="firstName"
+                          type="text"
+                          required
+                          className="block w-full px-4 py-4 text-lg border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all"
+                          placeholder={t('enterFirstName')}
+                          value={formData.firstName}
+                          onChange={handleInputChange}
+                        />
+                        <p className="text-sm text-gray-600 mt-2">💡 {t('firstNameHelp')}</p>
                       </div>
-                      <input
-                        id="dateOfBirth"
-                        name="dateOfBirth"
-                        type="date"
-                        required
-                        className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        value={formData.dateOfBirth}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </div>
 
-                  <div>
-                    <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-2">
-                      {t('gender')}
-                    </label>
-                    <select
-                      id="gender"
-                      name="gender"
-                      required
-                      className="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      value={formData.gender}
-                      onChange={handleInputChange}
-                    >
-                      <option value="">{t('selectGender')}</option>
-                      <option value="male">{t('male')}</option>
-                      <option value="female">{t('female')}</option>
-                      <option value="other">{t('other')}</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Contact Information */}
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
-                  {t('contactInformation')}
-                </h3>
-
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('emailAddress')}
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      required
-                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder={t('enterEmail')}
-                      value={formData.email}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('phoneNumber')}
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Phone className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      required
-                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder={t('enterPhone')}
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="village" className="block text-sm font-medium text-gray-700 mb-2">
-                      {t('village')}
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <MapPin className="h-5 w-5 text-gray-400" />
+                      <div>
+                        <label htmlFor="lastName" className="block text-lg font-semibold text-gray-800 mb-3">
+                          👨‍👩‍👧‍👦 {t('lastName')} <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          id="lastName"
+                          name="lastName"
+                          type="text"
+                          required
+                          className="block w-full px-4 py-4 text-lg border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all"
+                          placeholder={t('enterLastName')}
+                          value={formData.lastName}
+                          onChange={handleInputChange}
+                        />
+                        <p className="text-sm text-gray-600 mt-2">💡 {t('lastNameHelp')}</p>
                       </div>
-                      <input
-                        id="village"
-                        name="village"
-                        type="text"
-                        required
-                        className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder={t('enterVillage')}
-                        value={formData.village}
-                        onChange={handleInputChange}
-                      />
                     </div>
-                  </div>
 
-                  <div>
-                    <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
-                      {t('address')}
-                    </label>
-                    <input
-                      id="address"
-                      name="address"
-                      type="text"
-                      required
-                      className="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder={t('enterAddress')}
-                      value={formData.address}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Emergency Contact */}
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
-                  {t('emergencyContact')}
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="emergencyContact" className="block text-sm font-medium text-gray-700 mb-2">
-                      {t('emergencyContactName')}
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <User className="h-5 w-5 text-gray-400" />
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div>
+                        <label htmlFor="dateOfBirth" className="block text-lg font-semibold text-gray-800 mb-3">
+                          🎂 {t('dateOfBirth')} <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <Calendar className="absolute left-3 top-4 h-6 w-6 text-gray-400" />
+                          <input
+                            id="dateOfBirth"
+                            name="dateOfBirth"
+                            type="date"
+                            required
+                            className="block w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all"
+                            value={formData.dateOfBirth}
+                            onChange={handleInputChange}
+                          />
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2">💡 {t('dateOfBirthHelp')}</p>
                       </div>
-                      <input
-                        id="emergencyContact"
-                        name="emergencyContact"
-                        type="text"
-                        required
-                        className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder={t('enterEmergencyContact')}
-                        value={formData.emergencyContact}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </div>
 
-                  <div>
-                    <label htmlFor="emergencyPhone" className="block text-sm font-medium text-gray-700 mb-2">
-                      {t('emergencyPhone')}
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Phone className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        id="emergencyPhone"
-                        name="emergencyPhone"
-                        type="tel"
-                        required
-                        className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder={t('enterEmergencyPhone')}
-                        value={formData.emergencyPhone}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Password */}
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
-                  {t('accountSecurity')}
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                      {t('password')}
-                    </label>
-                    <div className="relative">
-                      <input
-                        id="password"
-                        name="password"
-                        type={showPassword ? 'text' : 'password'}
-                        required
-                        className="block w-full px-3 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder={t('enterPassword')}
-                        value={formData.password}
-                        onChange={handleInputChange}
-                      />
-                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                        <button
-                          type="button"
-                          className="text-gray-400 hover:text-gray-600"
-                          onClick={() => setShowPassword(!showPassword)}
+                      <div>
+                        <label htmlFor="gender" className="block text-lg font-semibold text-gray-800 mb-3">
+                          ⚥ {t('gender')} <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          id="gender"
+                          name="gender"
+                          required
+                          className="block w-full px-4 py-4 text-lg border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all bg-white"
+                          value={formData.gender}
+                          onChange={handleInputChange}
                         >
-                          {showPassword ? (
-                            <EyeOff className="h-5 w-5" />
-                          ) : (
-                            <Eye className="h-5 w-5" />
-                          )}
-                        </button>
+                          <option value="">{t('selectGender')}</option>
+                          <option value="male">👨 {t('male')}</option>
+                          <option value="female">👩 {t('female')}</option>
+                          <option value="other">⚥ {t('other')}</option>
+                        </select>
+                        <p className="text-sm text-gray-600 mt-2">💡 {t('genderHelp')}</p>
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  <div>
-                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                      {t('confirmPassword')}
-                    </label>
-                    <div className="relative">
-                      <input
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        type={showConfirmPassword ? 'text' : 'password'}
+                {/* Step 2: Contact Information */}
+                <div className="bg-green-50 rounded-xl p-6 border-l-4 border-green-500">
+                  <h3 className="text-xl font-bold text-green-900 mb-6 flex items-center">
+                    <Phone className="h-6 w-6 mr-3" />
+                    2️⃣ {t('contactInformation')}
+                  </h3>
+
+                  <div className="space-y-6">
+                    <div>
+                      <label htmlFor="phone" className="block text-lg font-semibold text-gray-800 mb-3">
+                        📱 {t('phoneNumber')} <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-4 h-6 w-6 text-gray-400" />
+                        <input
+                          id="phone"
+                          name="phone"
+                          type="tel"
+                          required
+                          className="block w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-200 focus:border-green-500 transition-all"
+                          placeholder={t('enterPhone')}
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                      <p className="text-sm text-gray-600 mt-2">💡 {t('phoneHelp')}</p>
+                    </div>
+
+                    <div>
+                      <label htmlFor="email" className="block text-lg font-semibold text-gray-800 mb-3">
+                        📧 {t('emailAddress')} <span className="text-gray-500">({t('optional')})</span>
+                      </label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-4 h-6 w-6 text-gray-400" />
+                        <input
+                          id="email"
+                          name="email"
+                          type="email"
+                          className="block w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-200 focus:border-green-500 transition-all"
+                          placeholder={t('enterEmail')}
+                          value={formData.email}
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                      <p className="text-sm text-gray-600 mt-2">💡 {t('emailHelp')}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Step 3: Address Information */}
+                <div className="bg-purple-50 rounded-xl p-6 border-l-4 border-purple-500">
+                  <h3 className="text-xl font-bold text-purple-900 mb-6 flex items-center">
+                    <MapPin className="h-6 w-6 mr-3" />
+                    3️⃣ {t('addressInformation')}
+                  </h3>
+
+                  <div className="space-y-6">
+                    <div>
+                      <label htmlFor="village" className="block text-lg font-semibold text-gray-800 mb-3">
+                        🏘️ {t('village')} <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-4 h-6 w-6 text-gray-400" />
+                        <input
+                          id="village"
+                          name="village"
+                          type="text"
+                          required
+                          className="block w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all"
+                          placeholder={t('enterVillage')}
+                          value={formData.village}
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                      <p className="text-sm text-gray-600 mt-2">💡 {t('villageHelp')}</p>
+                    </div>
+
+                    <div>
+                      <label htmlFor="address" className="block text-lg font-semibold text-gray-800 mb-3">
+                        🏠 {t('fullAddress')} <span className="text-red-500">*</span>
+                      </label>
+                      <textarea
+                        id="address"
+                        name="address"
                         required
-                        className="block w-full px-3 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder={t('confirmPassword')}
-                        value={formData.confirmPassword}
+                        rows={3}
+                        className="block w-full px-4 py-4 text-lg border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all resize-none"
+                        placeholder={t('enterAddress')}
+                        value={formData.address}
                         onChange={handleInputChange}
                       />
-                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                        <button
-                          type="button"
-                          className="text-gray-400 hover:text-gray-600"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        >
-                          {showConfirmPassword ? (
-                            <EyeOff className="h-5 w-5" />
-                          ) : (
-                            <Eye className="h-5 w-5" />
-                          )}
-                        </button>
+                      <p className="text-sm text-gray-600 mt-2">💡 {t('addressHelp')}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Step 4: Emergency Contact */}
+                <div className="bg-orange-50 rounded-xl p-6 border-l-4 border-orange-500">
+                  <h3 className="text-xl font-bold text-orange-900 mb-6 flex items-center">
+                    <Phone className="h-6 w-6 mr-3" />
+                    4️⃣ {t('emergencyContact')}
+                  </h3>
+
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div>
+                        <label htmlFor="emergencyContact" className="block text-lg font-semibold text-gray-800 mb-3">
+                          👨‍⚕️ {t('emergencyContactName')} <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          id="emergencyContact"
+                          name="emergencyContact"
+                          type="text"
+                          required
+                          className="block w-full px-4 py-4 text-lg border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-orange-200 focus:border-orange-500 transition-all"
+                          placeholder={t('enterEmergencyContact')}
+                          value={formData.emergencyContact}
+                          onChange={handleInputChange}
+                        />
+                        <p className="text-sm text-gray-600 mt-2">💡 {t('emergencyContactHelp')}</p>
+                      </div>
+
+                      <div>
+                        <label htmlFor="emergencyPhone" className="block text-lg font-semibold text-gray-800 mb-3">
+                          📞 {t('emergencyPhone')} <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <Phone className="absolute left-3 top-4 h-6 w-6 text-gray-400" />
+                          <input
+                            id="emergencyPhone"
+                            name="emergencyPhone"
+                            type="tel"
+                            required
+                            className="block w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-orange-200 focus:border-orange-500 transition-all"
+                            placeholder={t('enterEmergencyPhone')}
+                            value={formData.emergencyPhone}
+                            onChange={handleInputChange}
+                          />
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2">💡 {t('emergencyPhoneHelp')}</p>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex items-center">
-                <input
-                  id="terms"
-                  name="terms"
-                  type="checkbox"
-                  required
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
-                  {t('agreeToTerms')} <a href="#" className="text-blue-600 hover:text-blue-500">{t('termsAndConditions')}</a>
-                </label>
-              </div>
+                {/* Step 5: Security */}
+                <div className="bg-red-50 rounded-xl p-6 border-l-4 border-red-500">
+                  <h3 className="text-xl font-bold text-red-900 mb-6 flex items-center">
+                    <User className="h-6 w-6 mr-3" />
+                    5️⃣ {t('securityInformation')}
+                  </h3>
 
-              <div>
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full flex justify-center items-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader className="animate-spin h-4 w-4 mr-2" />
-                      Registering...
-                    </>
-                  ) : (
-                    t('createAccount')
-                  )}
-                </button>
-              </div>
-            </form>
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div>
+                        <label htmlFor="password" className="block text-lg font-semibold text-gray-800 mb-3">
+                          🔐 {t('password')} <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <input
+                            id="password"
+                            name="password"
+                            type={showPassword ? 'text' : 'password'}
+                            required
+                            className="block w-full px-4 py-4 text-lg border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-500 transition-all pr-12"
+                            placeholder={t('enterPassword')}
+                            value={formData.password}
+                            onChange={handleInputChange}
+                          />
+                          <button
+                            type="button"
+                            className="absolute right-3 top-4 text-gray-400 hover:text-gray-600"
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
+                          </button>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2">💡 {t('passwordHelp')}</p>
+                      </div>
 
-            <div className="mt-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
+                      <div>
+                        <label htmlFor="confirmPassword" className="block text-lg font-semibold text-gray-800 mb-3">
+                          🔒 {t('confirmPassword')} <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <input
+                            id="confirmPassword"
+                            name="confirmPassword"
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            required
+                            className="block w-full px-4 py-4 text-lg border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-500 transition-all pr-12"
+                            placeholder={t('confirmYourPassword')}
+                            value={formData.confirmPassword}
+                            onChange={handleInputChange}
+                          />
+                          <button
+                            type="button"
+                            className="absolute right-3 top-4 text-gray-400 hover:text-gray-600"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          >
+                            {showConfirmPassword ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
+                          </button>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2">💡 {t('confirmPasswordHelp')}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">{t('alreadyHaveAccount')}</span>
+
+                {/* Submit Button */}
+                <div className="bg-gradient-to-r from-blue-500 to-green-500 rounded-xl p-8 text-center">
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="group relative w-full flex justify-center items-center gap-3 py-4 px-8 text-xl font-bold rounded-xl text-white bg-white bg-opacity-20 hover:bg-opacity-30 disabled:bg-opacity-10 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-white focus:ring-opacity-50 transition-all transform hover:scale-105 disabled:transform-none"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader className="h-6 w-6 animate-spin" />
+                        {t('registering')}...
+                      </>
+                    ) : (
+                      <>
+                        <Heart className="h-6 w-6" />
+                        {t('registerPatient')}
+                      </>
+                    )}
+                  </button>
+                  <p className="text-white text-sm mt-4 opacity-90">
+                    🌟 {t('registrationFinalNote')}
+                  </p>
+                </div>
+              </form>
+
+              {/* Help Section */}
+              <div className="mt-8 p-6 bg-yellow-50 rounded-xl border-l-4 border-yellow-500">
+                <h4 className="text-lg font-bold text-yellow-800 mb-3 flex items-center">
+                  ❓ {t('needHelp')}
+                </h4>
+                <div className="text-yellow-700 space-y-2">
+                  <p>📞 {t('callForHelp')}: <span className="font-semibold">1800-XXX-XXXX</span></p>
+                  <p>💬 {t('askVillageHelper')}</p>
+                  <p>👥 {t('bringFamilyMember')}</p>
                 </div>
               </div>
 
-              <div className="mt-6">
+              {/* Sign In Link */}
+              <div className="text-center pt-6 border-t border-gray-200">
+                <p className="text-lg text-gray-600 mb-4">
+                  {t('alreadyHaveAccount')}
+                </p>
                 <button
+                  type="button"
                   onClick={onNavigateToSignIn}
-                  className="w-full flex justify-center py-3 px-4 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                  className="inline-flex items-center gap-2 px-6 py-3 text-lg font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors"
                 >
-                  {t('signIn')}
+                  <User className="h-5 w-5" />
+                  {t('signInHere')}
                 </button>
               </div>
             </div>
@@ -543,4 +582,4 @@ export default function PatientRegistration({ onNavigateToSignIn, onBackToHome }
       </div>
     </div>
   );
-}
+};

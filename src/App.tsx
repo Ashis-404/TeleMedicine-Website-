@@ -6,7 +6,7 @@ import ProblemStatement from './component/ProblemStatement';
 import Solution from './component/Solution';
 import Footer from './component/Footer';
 import SignIn from './component/SignIn';
-import PatientRegistration from './component/PatientRegistration';
+import { PatientRegistration } from './component/PatientRegistration';
 import PatientDashboard from './component/PatientDashboard';
 import DatabaseAdmin from './component/DatabaseAdmin';
 
