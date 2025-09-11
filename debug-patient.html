@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Patient Session Debug</title>
+</head>
+<body>
+    <h1>Patient Session Debug</h1>
+    <div id="debug-info"></div>
+    
+    <button onclick="clearStorage()">Clear Storage</button>
+    <button onclick="addTestPatient()">Add Test Patient</button>
+    <button onclick="checkStorage()">Check Storage</button>
+    <button onclick="goToDemo()">Go to Demo</button>
+    
+    <script>
+        function checkStorage() {
+            const patientSession = localStorage.getItem('patientSession');
+            const debugDiv = document.getElementById('debug-info');
+            
+            if (patientSession) {
+                try {
+                    const data = JSON.parse(patientSession);
+                    debugDiv.innerHTML = `
+                        <h3>Patient Session Found:</h3>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } catch (e) {
+                    debugDiv.innerHTML = `<p style="color: red;">Error parsing patient session: ${e.message}</p>`;
+                }
+            } else {
+                debugDiv.innerHTML = '<p>No patient session found in localStorage</p>';
+            }
+        }
+        
+        function clearStorage() {
+            localStorage.removeItem('patientSession');
+            checkStorage();
+        }
+        
+        function addTestPatient() {
+            const testPatientData = {
+                patient: {
+                    id: 1,
+                    firstName: "John",
+                    lastName: "Doe",
+                    email: "john.doe@example.com",
+                    phone: "123-456-7890",
+                    gender: "male",
+                    village: "Test Village",
+                    dateOfBirth: "1990-01-01",
+                    address: "123 Test Street",
+                    emergencyContact: "Jane Doe",
+                    emergencyPhone: "987-654-3210"
+                },
+                loginTime: new Date().toISOString()
+            };
+            
+            localStorage.setItem('patientSession', JSON.stringify(testPatientData));
+            checkStorage();
+        }
+        
+        function goToDemo() {
+            window.location.href = '/demo';
+        }
+        
+        // Check storage on load
+        window.onload = checkStorage;
+    </script>
+</body>
+</html>

@@ -7,9 +7,10 @@ import Solution from './component/Solution';
 import Footer from './component/Footer';
 import SignIn from './component/SignIn';
 import PatientRegistration from './component/PatientRegistration';
+import PatientDashboard from './component/PatientDashboard';
 import DatabaseAdmin from './component/DatabaseAdmin';
 
-type PageType = 'home' | 'signin' | 'register' | 'admin';
+type PageType = 'home' | 'signin' | 'register' | 'patient-dashboard' | 'admin';
 
 function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -19,6 +20,7 @@ function App() {
   const navigateToSignIn = () => setCurrentPage('signin');
   const navigateToRegister = () => setCurrentPage('register');
   const navigateToHome = () => setCurrentPage('home');
+  const navigateToPatientDashboard = () => setCurrentPage('patient-dashboard');
   const handleAdminLoginSuccess = (admin: any) => {
     setAdminUser(admin);
     setCurrentPage('admin');
@@ -56,6 +58,12 @@ function App() {
       {currentPage === 'register' && (
         <PatientRegistration 
           onNavigateToSignIn={navigateToSignIn}
+          onBackToHome={navigateToHome}
+        />
+      )}
+
+      {currentPage === 'patient-dashboard' && (
+        <PatientDashboard 
           onBackToHome={navigateToHome}
         />
       )}

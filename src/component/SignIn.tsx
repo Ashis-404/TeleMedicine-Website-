@@ -80,17 +80,22 @@ export default function SignIn({ onNavigateToRegister, onBackToHome, onAdminLogi
       if (patientResult.success && patientResult.patient) {
         setLoginStatus({
           type: 'success',
-          message: `Welcome back, ${patientResult.patient.firstName}!`
+          message: `Welcome back, ${patientResult.patient.firstName}! Redirecting to patient dashboard...`
         });
 
         // Clear form
         setFormData({ email: '', password: '' });
 
-        // In a real app, you would store the patient data in context/state
-        // and redirect to the patient dashboard
+        // Store patient data for the demo session
+        localStorage.setItem('patientSession', JSON.stringify({
+          patient: patientResult.patient,
+          loginTime: new Date().toISOString()
+        }));
+
+        // Redirect to the integrated demo via Vite static file
         setTimeout(() => {
-          onBackToHome();
-        }, 2000);
+          window.location.href = '/demo.html';
+        }, 1500);
 
       } else {
         setLoginStatus({
@@ -157,7 +162,7 @@ export default function SignIn({ onNavigateToRegister, onBackToHome, onAdminLogi
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address or Admin Username
+                  Email Address or Username
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -170,7 +175,7 @@ export default function SignIn({ onNavigateToRegister, onBackToHome, onAdminLogi
                     autoComplete="email"
                     required
                     className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter email or admin username"
+                    placeholder="Enter email or username"
                     value={formData.email}
                     onChange={handleInputChange}
                   />
