@@ -1,13 +1,14 @@
-import { Heart, Menu, X, PlayCircle } from 'lucide-react';
+import { Heart, Menu, X, User } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import LanguageSelector from './LanguageSelector';
 
 interface HeaderProps {
   mobileMenuOpen: boolean;
   setMobileMenuOpen: (open: boolean) => void;
+  onSignInClick: () => void;
 }
 
-export default function Header({ mobileMenuOpen, setMobileMenuOpen }: HeaderProps) {
+export default function Header({ mobileMenuOpen, setMobileMenuOpen, onSignInClick }: HeaderProps) {
   const { t } = useLanguage();
 
   return (
@@ -33,12 +34,12 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen }: HeaderProp
             </nav>
             <div className="flex items-center space-x-4">
               <LanguageSelector />
-              <a 
-                href="http://127.0.0.1:5000/"
+              <button 
+                onClick={onSignInClick}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
-                <PlayCircle className="h-4 w-4" />
-                <span>{t('tryDemo')}</span>
-              </a>
+                <User className="h-4 w-4" />
+                <span>{t('signIn')}</span>
+              </button>
             </div>
           </div>
           
@@ -63,12 +64,12 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen }: HeaderProp
                 <div className="flex justify-center">
                   <LanguageSelector />
                 </div>
-                <a 
-                  href="http://127.0.0.1:5000/"
+                <button 
+                  onClick={onSignInClick}
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 w-full justify-center">
-                  <PlayCircle className="h-4 w-4" />
-                  <span>{t('tryDemo')}</span>
-                </a>
+                  <User className="h-4 w-4" />
+                  <span>{t('signIn')}</span>
+                </button>
               </div>
             </nav>
           </div>

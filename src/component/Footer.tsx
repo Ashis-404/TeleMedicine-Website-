@@ -40,7 +40,6 @@ export default function Footer() {
               <li><a href="#problem" className="text-gray-400 hover:text-white transition-colors">{t('theProblem')}</a></li>
               <li><a href="#solution" className="text-gray-400 hover:text-white transition-colors">{t('ourSolution')}</a></li>
               <li><a href="#impact" className="text-gray-400 hover:text-white transition-colors">{t('expectedImpact')}</a></li>
-              <li><a href="#stakeholders" className="text-gray-400 hover:text-white transition-colors">{t('stakeholders')}</a></li>
             </ul>
           </div>
           

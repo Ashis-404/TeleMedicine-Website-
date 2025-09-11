@@ -32,10 +32,10 @@ const translations: Translations = {
     hi: 'प्रभाव',
     pa: 'ਪ੍ਰਭਾਵ'
   },
-  tryDemo: {
-    en: 'Try Demo',
-    hi: 'डेमो देखें',
-    pa: 'ਡੈਮੋ ਦੇਖੋ'
+  signIn: {
+    en: 'Sign In',
+    hi: 'साइन इन',
+    pa: 'ਸਾਈਨ ਇਨ'
   },
   
   // Hero Section
@@ -445,6 +445,210 @@ const translations: Translations = {
     en: 'Made with ❤️ for rural healthcare',
     hi: 'ग्रामीण स्वास्थ्य सेवा के लिए ❤️ से बनाया गया',
     pa: 'ਪੇਂਡੂ ਸਿਹਤ ਸੇਵਾ ਲਈ ❤️ ਨਾਲ ਬਣਾਇਆ ਗਿਆ'
+  },
+
+  // Sign In & Registration
+  signInDescription: {
+    en: 'Access your healthcare account',
+    hi: 'अपने स्वास्थ्य खाते तक पहुंचें',
+    pa: 'ਆਪਣੇ ਸਿਹਤ ਖਾਤੇ ਤੱਕ ਪਹੁੰਚੋ'
+  },
+  emailAddress: {
+    en: 'Email Address',
+    hi: 'ईमेल पता',
+    pa: 'ਈਮੇਲ ਪਤਾ'
+  },
+  enterEmail: {
+    en: 'Enter your email',
+    hi: 'अपना ईमेल दर्ज करें',
+    pa: 'ਆਪਣੀ ਈਮੇਲ ਦਰਜ ਕਰੋ'
+  },
+  password: {
+    en: 'Password',
+    hi: 'पासवर्ड',
+    pa: 'ਪਾਸਵਰਡ'
+  },
+  enterPassword: {
+    en: 'Enter your password',
+    hi: 'अपना पासवर्ड दर्ज करें',
+    pa: 'ਆਪਣਾ ਪਾਸਵਰਡ ਦਰਜ ਕਰੋ'
+  },
+  rememberMe: {
+    en: 'Remember me',
+    hi: 'मुझे याद रखें',
+    pa: 'ਮੈਨੂੰ ਯਾਦ ਰੱਖੋ'
+  },
+  forgotPassword: {
+    en: 'Forgot password?',
+    hi: 'पासवर्ड भूल गए?',
+    pa: 'ਪਾਸਵਰਡ ਭੁੱਲ ਗਏ?'
+  },
+  newPatient: {
+    en: 'New patient?',
+    hi: 'नया मरीज़?',
+    pa: 'ਨਵਾਂ ਮਰੀਜ਼?'
+  },
+  createAccount: {
+    en: 'Create Account',
+    hi: 'खाता बनाएं',
+    pa: 'ਖਾਤਾ ਬਣਾਓ'
+  },
+  alreadyHaveAccount: {
+    en: 'Already have an account?',
+    hi: 'पहले से खाता है?',
+    pa: 'ਪਹਿਲਾਂ ਤੋਂ ਖਾਤਾ ਹੈ?'
+  },
+
+  // Patient Registration
+  patientRegistration: {
+    en: 'Patient Registration',
+    hi: 'रोगी पंजीकरण',
+    pa: 'ਮਰੀਜ਼ ਰਜਿਸਟਰੇਸ਼ਨ'
+  },
+  registrationDescription: {
+    en: 'Create your healthcare account to access telemedicine services',
+    hi: 'टेलीमेडिसिन सेवाओं तक पहुंचने के लिए अपना स्वास्थ्य खाता बनाएं',
+    pa: 'ਟੈਲੀਮੈਡੀਸਿਨ ਸੇਵਾਵਾਂ ਤੱਕ ਪਹੁੰਚਣ ਲਈ ਆਪਣਾ ਸਿਹਤ ਖਾਤਾ ਬਣਾਓ'
+  },
+  personalInformation: {
+    en: 'Personal Information',
+    hi: 'व्यक्तिगत जानकारी',
+    pa: 'ਨਿੱਜੀ ਜਾਣਕਾਰੀ'
+  },
+  firstName: {
+    en: 'First Name',
+    hi: 'पहला नाम',
+    pa: 'ਪਹਿਲਾ ਨਾਮ'
+  },
+  enterFirstName: {
+    en: 'Enter first name',
+    hi: 'पहला नाम दर्ज करें',
+    pa: 'ਪਹਿਲਾ ਨਾਮ ਦਰਜ ਕਰੋ'
+  },
+  lastName: {
+    en: 'Last Name',
+    hi: 'अंतिम नाम',
+    pa: 'ਅੰਤਿਮ ਨਾਮ'
+  },
+  enterLastName: {
+    en: 'Enter last name',
+    hi: 'अंतिम नाम दर्ज करें',
+    pa: 'ਅੰਤਿਮ ਨਾਮ ਦਰਜ ਕਰੋ'
+  },
+  dateOfBirth: {
+    en: 'Date of Birth',
+    hi: 'जन्म तिथि',
+    pa: 'ਜਨਮ ਮਿਤੀ'
+  },
+  gender: {
+    en: 'Gender',
+    hi: 'लिंग',
+    pa: 'ਲਿੰਗ'
+  },
+  selectGender: {
+    en: 'Select gender',
+    hi: 'लिंग चुनें',
+    pa: 'ਲਿੰਗ ਚੁਣੋ'
+  },
+  male: {
+    en: 'Male',
+    hi: 'पुरुष',
+    pa: 'ਪੁਰਸ਼'
+  },
+  female: {
+    en: 'Female',
+    hi: 'महिला',
+    pa: 'ਔਰਤ'
+  },
+  other: {
+    en: 'Other',
+    hi: 'अन्य',
+    pa: 'ਹੋਰ'
+  },
+  contactInformation: {
+    en: 'Contact Information',
+    hi: 'संपर्क जानकारी',
+    pa: 'ਸੰਪਰਕ ਜਾਣਕਾਰੀ'
+  },
+  phoneNumber: {
+    en: 'Phone Number',
+    hi: 'फोन नंबर',
+    pa: 'ਫੋਨ ਨੰਬਰ'
+  },
+  enterPhone: {
+    en: 'Enter phone number',
+    hi: 'फोन नंबर दर्ज करें',
+    pa: 'ਫੋਨ ਨੰਬਰ ਦਰਜ ਕਰੋ'
+  },
+  village: {
+    en: 'Village',
+    hi: 'गांव',
+    pa: 'ਪਿੰਡ'
+  },
+  enterVillage: {
+    en: 'Enter village name',
+    hi: 'गांव का नाम दर्ज करें',
+    pa: 'ਪਿੰਡ ਦਾ ਨਾਮ ਦਰਜ ਕਰੋ'
+  },
+  address: {
+    en: 'Address',
+    hi: 'पता',
+    pa: 'ਪਤਾ'
+  },
+  enterAddress: {
+    en: 'Enter address',
+    hi: 'पता दर्ज करें',
+    pa: 'ਪਤਾ ਦਰਜ ਕਰੋ'
+  },
+  emergencyContact: {
+    en: 'Emergency Contact',
+    hi: 'आपातकालीन संपर्क',
+    pa: 'ਐਮਰਜੈਂਸੀ ਸੰਪਰਕ'
+  },
+  emergencyContactName: {
+    en: 'Emergency Contact Name',
+    hi: 'आपातकालीन संपर्क नाम',
+    pa: 'ਐਮਰਜੈਂਸੀ ਸੰਪਰਕ ਨਾਮ'
+  },
+  enterEmergencyContact: {
+    en: 'Enter emergency contact name',
+    hi: 'आपातकालीन संपर्क नाम दर्ज करें',
+    pa: 'ਐਮਰਜੈਂਸੀ ਸੰਪਰਕ ਨਾਮ ਦਰਜ ਕਰੋ'
+  },
+  emergencyPhone: {
+    en: 'Emergency Phone',
+    hi: 'आपातकालीन फोन',
+    pa: 'ਐਮਰਜੈਂਸੀ ਫੋਨ'
+  },
+  enterEmergencyPhone: {
+    en: 'Enter emergency phone',
+    hi: 'आपातकालीन फोन दर्ज करें',
+    pa: 'ਐਮਰਜੈਂਸੀ ਫੋਨ ਦਰਜ ਕਰੋ'
+  },
+  accountSecurity: {
+    en: 'Account Security',
+    hi: 'खाता सुरक्षा',
+    pa: 'ਖਾਤਾ ਸੁਰੱਖਿਆ'
+  },
+  confirmPassword: {
+    en: 'Confirm Password',
+    hi: 'पासवर्ड की पुष्टि करें',
+    pa: 'ਪਾਸਵਰਡ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ'
+  },
+  passwordMismatch: {
+    en: 'Passwords do not match!',
+    hi: 'पासवर्ड मेल नहीं खाते!',
+    pa: 'ਪਾਸਵਰਡ ਮੇਲ ਨਹੀਂ ਖਾਂਦੇ!'
+  },
+  agreeToTerms: {
+    en: 'I agree to the',
+    hi: 'मैं सहमत हूं',
+    pa: 'ਮੈਂ ਸਹਿਮਤ ਹਾਂ'
+  },
+  termsAndConditions: {
+    en: 'Terms and Conditions',
+    hi: 'नियम और शर्तें',
+    pa: 'ਨਿਯਮ ਅਤੇ ਸ਼ਰਤਾਂ'
   },
   
   // Language names
