@@ -80,7 +80,7 @@ export default function SignIn({ onNavigateToRegister, onBackToHome, onAdminLogi
       if (patientResult.success && patientResult.patient) {
         setLoginStatus({
           type: 'success',
-          message: `Welcome back, ${patientResult.patient.firstName}! Redirecting to patient dashboard...`
+          message: `Welcome back, ${patientResult.patient.firstName}! Loading patient portal...`
         });
 
         // Clear form
@@ -95,7 +95,7 @@ export default function SignIn({ onNavigateToRegister, onBackToHome, onAdminLogi
         // Redirect to the integrated demo via Vite static file
         setTimeout(() => {
           window.location.href = '/demo.html';
-        }, 1500);
+        }, 500);
 
       } else {
         setLoginStatus({
