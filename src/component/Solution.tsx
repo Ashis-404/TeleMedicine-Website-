@@ -1,43 +1,45 @@
-import React from 'react';
 import { Video, Smartphone, Pill, Brain, Wifi, Globe } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function Solution() {
+  const { t } = useLanguage();
+  
   const features = [
     {
       icon: Video,
-      title: "Multilingual Telemedicine",
-      description: "Video consultations with doctors in Punjabi, Hindi, and English",
-            benefits: ["24/7 availability", "Specialist access", "No travel required"]
+      title: t('multilingualTelemedicine'),
+      description: t('telemedicineDescription'),
+      benefits: [t('availability247'), t('specialistAccess'), t('noTravelRequired')]
     },
     {
       icon: Smartphone,
-      title: "Offline Digital Records",
-      description: "Digital health records accessible even in low-connectivity areas",
-      benefits: ["Medical history tracking", "Prescription management", "Offline sync"]
+      title: t('offlineDigitalRecords'),
+      description: t('digitalRecordsDescription'),
+      benefits: [t('medicalHistoryTracking'), t('prescriptionManagement'), t('offlineSync')]
     },
     {
       icon: Pill,
-      title: "Medicine Availability Tracker",
-      description: "Real-time updates on medicine stock at local pharmacies",
-      benefits: ["Live inventory", "Price comparison", "Reservation system"]
+      title: t('medicineAvailabilityTracker'),
+      description: t('medicineTrackerDescription'),
+      benefits: [t('liveInventory'), t('priceComparison'), t('reservationSystem')]
     },
     {
       icon: Brain,
-      title: "AI Symptom Checker",
-      description: "Intelligent preliminary diagnosis optimized for low-bandwidth",
-      benefits: ["Quick assessment", "Treatment guidance", "Emergency alerts"]
+      title: t('aiSymptomChecker'),
+      description: t('aiDescription'),
+      benefits: [t('quickAssessment'), t('treatmentGuidance'), t('emergencyAlerts')]
     },
     {
       icon: Wifi,
-      title: "Low-Bandwidth Optimization",
-      description: "Designed to work efficiently with limited internet connectivity",
-      benefits: ["Offline functionality", "Data compression", "SMS integration"]
+      title: t('lowBandwidthOptimization'),
+      description: t('bandwidthDescription'),
+      benefits: [t('offlineFunctionality'), t('dataCompression'), t('smsIntegration')]
     },
     {
       icon: Globe,
-      title: "Scalable Platform",
-      description: "Built to expand across rural regions throughout India",
-      benefits: ["Multi-state support", "Local adaptation", "Cloud infrastructure"]
+      title: t('scalablePlatform'),
+      description: t('scalableDescription'),
+      benefits: [t('multiStateSupport'), t('localAdaptation'), t('cloudInfrastructure')]
     }
   ];
 
@@ -46,11 +48,10 @@ export default function Solution() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-            Our Comprehensive Healthcare Solution
+            {t('comprehensiveSolutionTitle')}
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            A technology platform designed specifically for rural healthcare challenges, 
-            providing accessible, affordable, and quality medical care.
+            {t('comprehensiveSolutionDescription')}
           </p>
         </div>
         
@@ -75,13 +76,12 @@ export default function Solution() {
         </div>
         
         <div className="bg-gradient-to-r from-blue-600 to-green-600 rounded-2xl p-8 text-white text-center">
-          <h3 className="text-2xl font-bold mb-4">Ready to Transform Rural Healthcare?</h3>
+          <h3 className="text-2xl font-bold mb-4">{t('transformHealthcareTitle')}</h3>
           <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-            Join us in revolutionizing healthcare access for rural communities. 
-            Together, we can bridge the gap between villages and quality medical care.
+            {t('transformHealthcareDescription')}
           </p>
           <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
-            Get Started Today
+            {t('getStartedToday')}
           </button>
         </div>
       </div>
