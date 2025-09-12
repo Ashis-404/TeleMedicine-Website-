@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { LanguageProvider } from './context/LanguageContext';
 import Header from './component/Header';
 import Hero from './component/Hero';
@@ -7,9 +8,12 @@ import Solution from './component/Solution';
 import ServiceAreaMap from './component/ServiceAreaMap';
 import Footer from './component/Footer';
 import SignIn from './component/SignIn';
-import { PatientRegistration } from './component/PatientRegistration';
+import PatientRegistration from './component/PatientRegistration_backup';
 import PatientDashboard from './component/PatientDashboard';
 import DatabaseAdmin from './component/DatabaseAdmin';
+import PatientLanding from './component/PatientLanding';
+import DoctorLanding from './component/DoctorLanding';
+import HealthworkerLanding from './component/HealthworkerLanding';
 
 // Simple components for missing pieces
 const ImpactSection = () => (
@@ -34,73 +38,47 @@ const ImpactSection = () => (
   </div>
 );
 
-type PageType = 'home' | 'signin' | 'register' | 'patient-dashboard' | 'admin';
-
-function App() {
+// ✅ Separate wrapper so we can use useNavigate with Header
+function HomeLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState<PageType>('home');
-  const [adminUser, setAdminUser] = useState<any>(null);
-
-  const navigateToSignIn = () => setCurrentPage('signin');
-  const navigateToRegister = () => setCurrentPage('register');
-  const navigateToHome = () => setCurrentPage('home');
-  const handleAdminLoginSuccess = (admin: any) => {
-    setAdminUser(admin);
-    setCurrentPage('admin');
-  };
-  const handleAdminLogout = () => {
-    setAdminUser(null);
-    setCurrentPage('home');
-  };
+  const navigate = useNavigate();
 
   return (
+    <>
+      <Header 
+        mobileMenuOpen={mobileMenuOpen} 
+        setMobileMenuOpen={setMobileMenuOpen}
+        onSignInClick={() => navigate("/signin")} // ✅ go to SignIn page
+      />
+      <Hero />
+      <ProblemStatement />
+      <Solution />
+      <ServiceAreaMap />
+      <ImpactSection />
+      <Footer />
+    </>
+  );
+}
+
+function App() {
+  return (
     <LanguageProvider>
-      <div className="min-h-screen bg-white">
-        {currentPage === 'home' && (
-          <>
-            <Header 
-              mobileMenuOpen={mobileMenuOpen} 
-              setMobileMenuOpen={setMobileMenuOpen}
-              onSignInClick={navigateToSignIn}
-            />
-            <Hero />
-            <ProblemStatement />
-            <Solution />
-            <ServiceAreaMap />
-            <ImpactSection />
-            <Footer />
-          </>
-        )}
-        
-        {currentPage === 'signin' && (
-          <SignIn 
-            onNavigateToRegister={navigateToRegister}
-            onBackToHome={navigateToHome}
-            onAdminLoginSuccess={handleAdminLoginSuccess}
-          />
-        )}
-        
-        {currentPage === 'register' && (
-          <PatientRegistration 
-            onNavigateToSignIn={navigateToSignIn}
-            onBackToHome={navigateToHome}
-          />
-        )}
+      <Router>
+        <div className="min-h-screen bg-white">
+          <Routes>
+            <Route path="/" element={<HomeLayout />} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/register" element={<PatientRegistration />} />
+            <Route path="/patient-dashboard" element={<PatientDashboard />} />
+            <Route path="/admin" element={<DatabaseAdmin />} />
 
-        {currentPage === 'patient-dashboard' && (
-          <PatientDashboard 
-            onBackToHome={navigateToHome}
-          />
-        )}
-
-        {currentPage === 'admin' && adminUser && (
-          <DatabaseAdmin 
-            onBackToHome={navigateToHome}
-            onLogout={handleAdminLogout}
-            adminUser={adminUser}
-          />
-        )}
-      </div>
+            {/* New landing pages */}
+            <Route path="/patient-landing" element={<PatientLanding />} />
+            <Route path="/doctor-landing" element={<DoctorLanding />} />
+            <Route path="/healthworker-landing" element={<HealthworkerLanding />} />
+          </Routes>
+        </div>
+      </Router>
     </LanguageProvider>
   );
 }

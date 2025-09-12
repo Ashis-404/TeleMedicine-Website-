@@ -1,3 +1,5 @@
+/*Footer.tsx*/
+
 import { Heart, Mail, Phone, MapPin, Globe, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 

@@ -1,3 +1,5 @@
+/*LanguageSelector.tsx*/
+
 import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Globe } from 'lucide-react';
 import { useLanguage, Language } from '../context/LanguageContext';

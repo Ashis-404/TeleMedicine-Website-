@@ -1,4 +1,6 @@
-import { Heart, Menu, X, PlayCircle, User } from 'lucide-react';
+/*Header.tsx*/
+
+import { Heart, Menu, X, User } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import LanguageSelector from './LanguageSelector';
 
@@ -20,7 +22,7 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onSignInClic
               <Heart className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">HealthBridge</h1>
+              <h1 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">NabhaCare</h1>
               <p className="text-xs text-gray-600">Rural Care</p>
             </div>
           </div>
@@ -50,12 +52,7 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onSignInClic
             </nav>
             <div className="flex items-center space-x-4">
               <LanguageSelector />
-              <a 
-                href="http://127.0.0.1:5000/"
-                className="bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-300 flex items-center space-x-2 hover:scale-105 hover:shadow-lg">
-                <PlayCircle className="h-4 w-4" />
-                <span>{t('tryDemo')}</span>
-              </a>
+              
               <button 
                 onClick={onSignInClick}
                 className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 flex items-center space-x-2 hover:scale-105 hover:shadow-lg">
@@ -87,12 +84,7 @@ export default function Header({ mobileMenuOpen, setMobileMenuOpen, onSignInClic
                 <div className="flex justify-center">
                   <LanguageSelector />
                 </div>
-                <a 
-                  href="http://127.0.0.1:5000/"
-                  className="bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-300 flex items-center space-x-2 w-full justify-center hover:scale-105">
-                  <PlayCircle className="h-4 w-4" />
-                  <span>{t('tryDemo')}</span>
-                </a>
+      
                 <button 
                   onClick={onSignInClick}
                   className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 flex items-center space-x-2 w-full justify-center hover:scale-105">

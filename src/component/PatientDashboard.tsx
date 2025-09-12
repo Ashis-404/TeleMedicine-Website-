@@ -1,17 +1,14 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, AlertCircle, CheckCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-interface PatientDashboardProps {
-  onBackToHome: () => void;
-}
-
-export default function PatientDashboard({ onBackToHome }: PatientDashboardProps) {
+export default function PatientDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [patientData, setPatientData] = useState<any>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Get patient session data
     const sessionData = localStorage.getItem('patientSession');
     if (sessionData) {
       try {
@@ -22,13 +19,11 @@ export default function PatientDashboard({ onBackToHome }: PatientDashboardProps
       }
     }
 
-    // Check if Flask server is running
     const checkFlaskServer = async () => {
       try {
         const response = await fetch('/health');
         if (response.ok) {
           setIsLoading(false);
-          // Redirect to the Flask demo
           window.location.href = '/demo';
         } else {
           throw new Error('Flask server not responding');
@@ -39,7 +34,6 @@ export default function PatientDashboard({ onBackToHome }: PatientDashboardProps
       }
     };
 
-    // Wait a bit then check Flask server
     const timer = setTimeout(checkFlaskServer, 1000);
     return () => clearTimeout(timer);
   }, []);
@@ -50,7 +44,7 @@ export default function PatientDashboard({ onBackToHome }: PatientDashboardProps
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full mx-4">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -68,7 +62,7 @@ export default function PatientDashboard({ onBackToHome }: PatientDashboardProps
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full mx-4">
           <div className="text-center">
             <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
@@ -87,8 +81,8 @@ export default function PatientDashboard({ onBackToHome }: PatientDashboardProps
                 Open Flask Server
               </button>
               <button
-                onClick={onBackToHome}
-                className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                onClick={() => navigate("/")}
+                className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 flex items-center justify-center gap-2"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Back to Home
@@ -101,7 +95,7 @@ export default function PatientDashboard({ onBackToHome }: PatientDashboardProps
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full mx-4">
         <div className="text-center">
           <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
@@ -113,8 +107,8 @@ export default function PatientDashboard({ onBackToHome }: PatientDashboardProps
           </p>
           
           <button
-            onClick={onBackToHome}
-            className="bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-2 mx-auto"
+            onClick={() => navigate("/")}
+            className="bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 flex items-center justify-center gap-2 mx-auto"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Home

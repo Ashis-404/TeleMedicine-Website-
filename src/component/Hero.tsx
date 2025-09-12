@@ -1,3 +1,5 @@
+/*Hero.tsx*/
+
 import { useEffect, useState } from 'react';
 import { Video, MapPin, Users, TrendingUp } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';

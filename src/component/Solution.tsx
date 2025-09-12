@@ -1,3 +1,5 @@
+/*Solution.tsx*/
+
 import { useEffect, useState } from 'react';
 import { Video, Smartphone, Pill, Brain, Wifi, Globe, CheckCircle, PlayCircle } from 'lucide-react';
 

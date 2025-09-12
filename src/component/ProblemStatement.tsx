@@ -1,3 +1,5 @@
+/*ProblemStatement.tsx*/
+
 import { useEffect, useState } from 'react';
 import { AlertTriangle, TrendingDown, DollarSign, Clock } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
