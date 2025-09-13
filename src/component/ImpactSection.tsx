@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { TrendingUp, Users, Clock, Heart, Target, Award } from 'lucide-react';
+import  { useEffect, useState } from 'react';
+import { TrendingUp, Users, Clock, Heart} from 'lucide-react';
 
 export default function ImpactSection() {
   const [isVisible, setIsVisible] = useState(false);
