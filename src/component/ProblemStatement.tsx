@@ -40,7 +40,7 @@ export default function ProblemStatement() {
       title: t('longTravelTimes') || "Long Travel Times",
       description: t('travelTimesDescription') || "Patients from 173 villages travel long distances, often missing work",
       stat: t('travelTimeHours') || "2-4 Hours",
-      color: "orange",
+      color: "red",
       delay: 100
     },
     {
@@ -48,16 +48,16 @@ export default function ProblemStatement() {
       title: t('medicineShortages') || "Medicine Shortages",
       description: t('medicineShortagesDescription') || "Frequent stockouts lead to wasted trips and delayed treatment",
       stat: t('medicineUnavailable') || "30% Unavailable",
-      color: "yellow",
-      delay: 200
+      color: "red",
+      delay: 100
     },
     {
       icon: DollarSign,
       title: t('financialBurden') || "Financial Burden",
       description: t('financialBurdenDescription') || "Daily-wage earners lose income due to healthcare-related travel",
       stat: t('moneyLostPerVisit') || "₹500-1000 Lost/Visit",
-      color: "pink",
-      delay: 300
+      color: "red",
+      delay: 100
     }
   ];
 
