@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Phone, Video, Building2, Search, ChevronDown, Clock, MapPin, AlertCircle, Pill, HeartPulse } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
+import { API_ENDPOINTS } from "../config/api";
 
 type Severity = "Mild" | "Risky" | "Severe";
 
@@ -44,7 +45,7 @@ export default function HealthWorkerDashboard() {
     async function fetchProfile() {
       if (!token) { window.location.href = "/signin"; return; }
       try {
-        const res = await fetch("http://localhost:4000/api/me", { headers: { Authorization: `Bearer ${token}` } });
+        const res = await fetch(API_ENDPOINTS.profile.me, { headers: { Authorization: `Bearer ${token}` } });
         const data = await res.json();
         if (res.ok) setProfile(data.profile);
         else window.location.href = "/signin";

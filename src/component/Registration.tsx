@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { API_ENDPOINTS, getAuthHeaders } from "../config/api";
+import { safeApiCall } from "../utils/api";
 
 export default function Registration() {
   const navigate = useNavigate();
@@ -67,29 +68,29 @@ export default function Registration() {
           break;
       }
 
-      const res = await fetch(endpoint, {
+      const result = await safeApiCall(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Registration failed");
+      if (!result.success) {
+        throw new Error(result.error || "Registration failed");
+      }
 
       // Show success message first
-      setSuccess(`Registration successful! Welcome ${data.user.role === 'patient' ? data.user.name : formData.name}!`);
+      setSuccess(`Registration successful! Welcome ${result.data.user.role === 'patient' ? result.data.user.name : formData.name}!`);
 
       // Save token & user to AuthContext (direct login after registration)
-      setToken(data.token);
+      setToken(result.data.token);
       setUser({ 
-        id: data.user.id, 
-        role: data.user.role, 
-        phone: data.user.phone, 
-        email: data.user.email 
+        id: result.data.user.id, 
+        role: result.data.user.role, 
+        phone: result.data.user.phone, 
+        email: result.data.user.email 
       });
 
       // Redirect immediately after success
-      switch (data.user.role) {
+      switch (result.data.user.role) {
         case "patient":
           window.location.href = "/patient-landing";
           break;

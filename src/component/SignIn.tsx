@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { API_ENDPOINTS } from "../config/api";
+import { safeApiCall } from "../utils/api";
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -25,22 +26,23 @@ export default function SignIn() {
     try {
       if (role === "patient") {
         // Direct patient login with phone number verification
-        const res = await fetch(API_ENDPOINTS.auth.loginPatient, {
+        const result = await safeApiCall(API_ENDPOINTS.auth.loginPatient, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ phone: formData.phone }),
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Patient not found");
         
-        console.log("Patient login successful:", data);
+        if (!result.success) {
+          throw new Error(result.error || "Patient not found");
+        }
+        
+        console.log("Patient login successful:", result.data);
         
         // Show success message
         setSuccess("Login successful! Redirecting to dashboard...");
         
         // Save token & user to AuthContext
-        setToken(data.token);
-        setUser({ id: data.user.id, role: data.user.role, phone: data.user.phone, email: data.user.email });
+        setToken(result.data.token);
+        setUser({ id: result.data.user.id, role: result.data.user.role, phone: result.data.user.phone, email: result.data.user.email });
         
         console.log("Navigating to patient-landing...");
         
@@ -49,9 +51,8 @@ export default function SignIn() {
         
       } else {
         // Doctor/healthworker direct login with credentials
-        const res = await fetch(API_ENDPOINTS.auth.loginDoctor, {
+        const result = await safeApiCall(API_ENDPOINTS.auth.loginDoctor, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             identifier: formData.identifier,
             password: formData.password,
@@ -59,19 +60,21 @@ export default function SignIn() {
             role: role,
           }),
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Invalid credentials");
+        
+        if (!result.success) {
+          throw new Error(result.error || "Invalid credentials");
+        }
         
         // Show success message
         setSuccess("Login successful! Redirecting to dashboard...");
         
         // Save token & user to AuthContext
-        setToken(data.token);
-        setUser({ id: data.user.id, role: data.user.role, phone: data.user.phone, email: data.user.email });
+        setToken(result.data.token);
+        setUser({ id: result.data.user.id, role: result.data.user.role, phone: result.data.user.phone, email: result.data.user.email });
         
         // Redirect based on role after a brief delay
         setTimeout(() => {
-          if (data.user.role === "doctor") {
+          if (result.data.user.role === "doctor") {
             navigate("/doctor-landing");
           } else {
             navigate("/healthworker-landing");

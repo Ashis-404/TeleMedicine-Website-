@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Video, FilePlus, User, Clock, CheckCircle, Phone, MessageCircle } from "lucide-react";
 import { useAuth } from "../auth/AuthContext";
+import { API_ENDPOINTS } from "../config/api";
 
 const mockActivePatients = [
   { id: "PAT67890", name: "Asha Rani", age: 34, village: "Bhawanigarh", symptoms: "High fever", priority: "High", waitTime: "5 mins" },
@@ -84,7 +85,7 @@ export default function DoctorDashboard() {
         return;
       }
       try {
-        const res = await fetch("http://localhost:4000/api/me", {
+        const res = await fetch(API_ENDPOINTS.profile.me, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
