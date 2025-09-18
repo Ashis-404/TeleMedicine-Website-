@@ -1,3 +1,5 @@
+/*PatientDashboard.tsx*/
+
 import { useEffect, useState } from 'react';
 import { ArrowLeft, AlertCircle, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';

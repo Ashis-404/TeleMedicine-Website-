@@ -1,3 +1,5 @@
+/*patientService.ts*/
+
 // Patient service for database operations
 import bcrypt from 'bcrypt';
 

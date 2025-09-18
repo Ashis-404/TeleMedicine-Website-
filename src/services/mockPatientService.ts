@@ -7,6 +7,7 @@
 // - Registration and login validation
 // - Test patient seeding
 
+/*mockPatientService.ts*/
 export interface PatientRegistrationData {
   firstName: string;
   lastName: string;

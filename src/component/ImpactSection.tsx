@@ -1,3 +1,5 @@
+/*ImpactSection.tsx*/
+
 import  { useEffect, useState } from 'react';
 import { TrendingUp, Users, Clock, Heart} from 'lucide-react';
 

@@ -1,3 +1,5 @@
+/*sqlitePatientService.ts*/
+
 // SQLite Patient Service (using .db file for persistent storage)
 // This replaces the localStorage-based mock service with actual file-based database storage
 // Uses sql.js for browser compatibility

@@ -1,178 +1,210 @@
-
-
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
+import { API_ENDPOINTS } from "../config/api";
 
 export default function SignIn() {
   const navigate = useNavigate();
-  const [role, setRole] = useState<"patient" | "doctor" | "healthworker" | "">(
-    ""
-  );
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    password: "",
-    email: "",
-    employeeId: "",
-  });
-  const [error, setError] = useState("");
+  const { setToken, setUser } = useAuth();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [role, setRole] = useState<"patient" | "doctor" | "healthworker">("patient");
+  const [formData, setFormData] = useState<any>({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
 
-    if (role === "patient") {
-      if (formData.name && formData.phone && formData.password) {
-        navigate("/patient-landing"); // redirect to patient landing
+    try {
+      if (role === "patient") {
+        // Direct patient login with phone number verification
+        const res = await fetch(API_ENDPOINTS.auth.loginPatient, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone: formData.phone }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Patient not found");
+        
+        console.log("Patient login successful:", data);
+        
+        // Show success message
+        setSuccess("Login successful! Redirecting to dashboard...");
+        
+        // Save token & user to AuthContext
+        setToken(data.token);
+        setUser({ id: data.user.id, role: data.user.role, phone: data.user.phone, email: data.user.email });
+        
+        console.log("Navigating to patient-landing...");
+        
+        // Immediate redirect
+        window.location.href = "/patient-landing";
+        
       } else {
-        setError("Please fill all fields for Patient login.");
+        // Doctor/healthworker direct login with credentials
+        const res = await fetch(API_ENDPOINTS.auth.loginDoctor, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            identifier: formData.identifier,
+            password: formData.password,
+            employeeId: formData.employeeId,
+            role: role,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Invalid credentials");
+        
+        // Show success message
+        setSuccess("Login successful! Redirecting to dashboard...");
+        
+        // Save token & user to AuthContext
+        setToken(data.token);
+        setUser({ id: data.user.id, role: data.user.role, phone: data.user.phone, email: data.user.email });
+        
+        // Redirect based on role after a brief delay
+        setTimeout(() => {
+          if (data.user.role === "doctor") {
+            navigate("/doctor-landing");
+          } else {
+            navigate("/healthworker-landing");
+          }
+        }, 1000);
       }
-    } else if (role === "doctor") {
-      // static credentials for now
-      if (
-        formData.email === "doctor@nabha.com" &&
-        formData.password === "doctor@123" &&
-        formData.employeeId === "DOC001"
-      ) {
-        navigate("/doctor-landing"); // redirect to doctor landing
-      } else {
-        setError("Invalid credentials for " + role);
-      }
-    } 
-     else if ( role === "healthworker") {
-      // static credentials for now
-      if (
-        formData.email === "healthworker@nabha.com" &&
-        formData.password === "healthworker@123" &&
-        formData.employeeId === "HW001"
-      ) {
-       navigate("/healthworker-landing"); // redirect to healthworker landing
-      } else {
-        setError("Invalid credentials for " + role);
-      }
-    } 
-    else {
-      setError("Please select a role first.");
+    } catch (err: any) {
+      setError(err.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
   return (
-    <div className="flex justify-center items-center min-h-[80vh]">
-      <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-900">
-          Sign In
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          Sign In to Your Account
         </h2>
-
-        {/* Role Selector */}
-        <div className="flex justify-between mb-6">
-          {["patient", "doctor", "healthworker"].map((r) => (
-            <button
-              key={r}
-              onClick={() => setRole(r as any)}
-              className={`px-4 py-2 rounded-lg border ${
-                role === r
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-700"
-              }`}
-            >
-              {r.charAt(0).toUpperCase() + r.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        {error && (
-          <p className="text-red-500 text-sm mb-4 text-center">{error}</p>
-        )}
-
-        {/* Dynamic Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {role === "patient" && (
-            <>
-              <input
-                type="text"
-                name="name"
-                placeholder="Name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full p-3 border rounded-lg"
-              />
-              <input
-                type="text"
-                name="phone"
-                placeholder="Phone Number"
-                value={formData.phone}
-                onChange={handleChange}
-                className="w-full p-3 border rounded-lg"
-              />
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full p-3 border rounded-lg"
-              />
-            </>
-          )}
-
-          {(role === "doctor" || role === "healthworker") && (
-            <>
-              <input
-                type="text"
-                name="name"
-                placeholder="Full Name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full p-3 border rounded-lg"
-              />
-              <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full p-3 border rounded-lg"
-              />
-              <input
-                type="text"
-                name="employeeId"
-                placeholder="Employee ID"
-                value={formData.employeeId}
-                onChange={handleChange}
-                className="w-full p-3 border rounded-lg"
-              />
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full p-3 border rounded-lg"
-              />
-            </>
-          )}
-
+        <p className="mt-2 text-center text-sm text-gray-600">
+          Don't have an account?{" "}
           <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
-          >
-            Sign In
-          </button>
-        </form>
-
-        <p className="mt-4 text-center text-sm text-gray-600">
-          Don’t have an account?{" "}
-          <span
-            className="text-blue-600 cursor-pointer hover:underline"
             onClick={() => navigate("/register")}
+            className="font-medium text-blue-600 hover:text-blue-500"
           >
             Register here
-          </span>
+          </button>
         </p>
+      </div>
+
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          {/* Show error message */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+          )}
+
+          {/* Show success message */}
+          {success && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-green-600 text-sm">{success}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Role Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Your Role
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {["patient", "doctor", "healthworker"].map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => {
+                      setRole(r as any);
+                      setFormData({});
+                      setError(null);
+                      setSuccess(null);
+                    }}
+                    className={`py-3 px-2 border rounded-lg text-center font-medium text-sm ${
+                      role === r
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    {r.charAt(0).toUpperCase() + r.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Role-specific forms */}
+            <div className="space-y-4">
+              {role === "patient" && (
+                <input
+                  name="phone"
+                  placeholder="Phone Number"
+                  onChange={handleChange}
+                  className="w-full p-3 border rounded-lg"
+                  required
+                />
+              )}
+
+              {role !== "patient" && (
+                <>
+                  <input
+                    name="identifier"
+                    placeholder="Email or Phone"
+                    onChange={handleChange}
+                    className="w-full p-3 border rounded-lg"
+                    required
+                  />
+                  <input
+                    name="password"
+                    placeholder="Password"
+                    type="password"
+                    onChange={handleChange}
+                    className="w-full p-3 border rounded-lg"
+                    required
+                  />
+                  <input
+                    name="employeeId"
+                    placeholder="Employee ID"
+                    onChange={handleChange}
+                    className="w-full p-3 border rounded-lg"
+                    required
+                  />
+                </>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Signing In...
+                </div>
+              ) : success ? (
+                "Redirecting..."
+              ) : (
+                "Sign In"
+              )}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

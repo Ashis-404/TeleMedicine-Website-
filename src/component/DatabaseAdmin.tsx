@@ -1,3 +1,5 @@
+/*DatabaseAdmin.tsx*/
+
 import { useState, useEffect } from 'react';
 import { Database, Download, Trash2 } from 'lucide-react';
 import { patientService } from '../services/indexedDBPatientService';

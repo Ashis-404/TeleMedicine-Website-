@@ -1,3 +1,5 @@
+/*database.ts*/
+
 // Database configuration for HealthBridge
 import mysql from 'mysql2/promise';
 

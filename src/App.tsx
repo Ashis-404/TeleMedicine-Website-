@@ -1,34 +1,32 @@
-import { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import { LanguageProvider } from './context/LanguageContext';
-import Header from './component/Header';
-import Hero from './component/Hero';
-import ProblemStatement from './component/ProblemStatement';
-import Solution from './component/Solution';
-import ServiceAreaMap from './component/ServiceAreaMap';
-import Footer from './component/Footer';
-import SignIn from './component/SignIn';
-import PatientRegistration from './component/PatientRegistration_backup';
-import PatientDashboard from './component/PatientDashboard';
-import DatabaseAdmin from './component/DatabaseAdmin';
-import PatientLanding from './component/PatientLanding';
-import DoctorLanding from './component/DoctorLanding';
-import HealthworkerLanding from './component/HealthworkerLanding';
-import ImpactSection from './component/ImpactSection';
+import { useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { LanguageProvider } from "./context/LanguageContext";
+import { AuthProvider, useAuth } from "./auth/AuthContext"; // ✅ NEW
+import Header from "./component/Header";
+import Hero from "./component/Hero";
+import ProblemStatement from "./component/ProblemStatement";
+import Solution from "./component/Solution";
+import ServiceAreaMap from "./component/ServiceAreaMap";
+import Footer from "./component/Footer";
+import SignIn from "./component/SignIn";
+import Registration from "./component/Registration";
+import PatientLanding from "./component/PatientLanding";
+import DoctorLanding from "./component/DoctorLanding";
+import HealthworkerLanding from "./component/HealthworkerLanding";
+import DatabaseAdmin from "./component/DatabaseAdmin";
+import ImpactSection from "./component/ImpactSection";
 
-
-
-// ✅ Separate wrapper so we can use useNavigate with Header
+// ✅ Wrapper to use Header + Homepage
 function HomeLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   return (
     <>
-      <Header 
-        mobileMenuOpen={mobileMenuOpen} 
+      <Header
+        mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
-        onSignInClick={() => navigate("/signin")} // ✅ go to SignIn page
+        onSignInClick={() => navigate("/signin")}
       />
       <Hero />
       <ProblemStatement />
@@ -40,25 +38,65 @@ function HomeLayout() {
   );
 }
 
+// ✅ ProtectedRoute wrapper to restrict access to signed-in users
+function ProtectedRoute({ children, allowedRole }: { children: JSX.Element; allowedRole?: string }) {
+  const { token, user } = useAuth();
+
+  if (!token) {
+    // If not logged in → redirect to signin
+    return <Navigate to="/signin" replace />;
+  }
+
+  if (allowedRole && user?.role !== allowedRole) {
+    // If user doesn't have permission → redirect home
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+}
+
 function App() {
   return (
     <LanguageProvider>
-      <Router>
-        <div className="min-h-screen bg-white">
-          <Routes>
-            <Route path="/" element={<HomeLayout />} />
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/register" element={<PatientRegistration />} />
-            <Route path="/patient-dashboard" element={<PatientDashboard />} />
-            <Route path="/admin" element={<DatabaseAdmin />} />
+      <AuthProvider>
+        <Router>
+          <div className="min-h-screen bg-white">
+            <Routes>
+              {/* Public Pages */}
+              <Route path="/" element={<HomeLayout />} />
+              <Route path="/signin" element={<SignIn />} />
+              <Route path="/register" element={<Registration />} />
+              <Route path="/admin" element={<DatabaseAdmin />} />
 
-            {/* New landing pages */}
-            <Route path="/patient-landing" element={<PatientLanding />} />
-            <Route path="/doctor-landing" element={<DoctorLanding />} />
-            <Route path="/healthworker-landing" element={<HealthworkerLanding />} />
-          </Routes>
-        </div>
-      </Router>
+              {/* ✅ Protected Dashboard Routes */}
+              <Route
+                path="/patient-landing"
+                element={
+                  <ProtectedRoute allowedRole="patient">
+                    <PatientLanding />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/doctor-landing"
+                element={
+                  <ProtectedRoute allowedRole="doctor">
+                    <DoctorLanding />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/healthworker-landing"
+                element={
+                  <ProtectedRoute allowedRole="healthworker">
+                    <HealthworkerLanding />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </div>
+        </Router>
+      </AuthProvider>
     </LanguageProvider>
   );
 }

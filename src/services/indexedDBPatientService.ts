@@ -1,3 +1,5 @@
+/*indexedDBPatientService.ts*/
+
 // IndexedDB Patient Service (using browser's built-in database for persistent storage)
 // This provides real database functionality with file-like persistence in the browser
 
