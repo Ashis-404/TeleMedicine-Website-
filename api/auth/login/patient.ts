@@ -27,37 +27,42 @@ export default async function handler(req: any, res: any) {
     
     const conn = await getDbConnection();
     
-    // Find user by phone number
-    const [users] = await conn.execute(
-      "SELECT * FROM users WHERE phone=? AND role='patient' AND is_active=TRUE",
-      [phone]
-    );
-    
-    const user = (users as any[])[0];
-    
-    if (!user) {
-      return res.status(401).json({ error: "Invalid phone number or user not found" });
+    try {
+      // Find user by phone number
+      const [users] = await conn.execute(
+        "SELECT * FROM users WHERE phone=? AND role='patient' AND is_active=TRUE",
+        [phone]
+      );
+      
+      const user = (users as any[])[0];
+      
+      if (!user) {
+        return res.status(401).json({ error: "Invalid phone number or user not found" });
+      }
+      
+      // Generate JWT token
+      const jwt = require('jsonwebtoken');
+      const secret = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+      const token = jwt.sign(
+        { id: user.id, role: 'patient', phone: user.phone }, 
+        secret, 
+        { expiresIn: '7d' }
+      );
+      
+      res.status(200).json({
+        ok: true,
+        token,
+        user: {
+          id: user.id,
+          role: user.role,
+          phone: user.phone
+        },
+        message: "Login successful"
+      });
+      
+    } finally {
+      await conn.end();
     }
-    
-    // Generate JWT token
-    const jwt = require('jsonwebtoken');
-    const secret = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
-    const token = jwt.sign(
-      { id: user.id, role: 'patient', phone: user.phone }, 
-      secret, 
-      { expiresIn: '7d' }
-    );
-    
-    res.status(200).json({
-      ok: true,
-      token,
-      user: {
-        id: user.id,
-        role: user.role,
-        phone: user.phone
-      },
-      message: "Login successful"
-    });
     
   } catch (error) {
     console.error("Login error:", error);

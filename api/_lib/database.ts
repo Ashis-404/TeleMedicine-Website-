@@ -15,25 +15,11 @@ const dbConfig = {
   reconnect: true
 };
 
-// Global variable to cache the connection
-let cachedConnection: mysql.Connection | null = null;
-
 export async function getDbConnection() {
-  if (cachedConnection) {
-    try {
-      // Test if connection is still alive
-      await cachedConnection.ping();
-      return cachedConnection;
-    } catch (error) {
-      // Connection is dead, create a new one
-      cachedConnection = null;
-    }
-  }
-  
   try {
-    cachedConnection = await mysql.createConnection(dbConfig);
+    const connection = await mysql.createConnection(dbConfig);
     console.log('✅ Database connection established');
-    return cachedConnection;
+    return connection;
   } catch (error) {
     console.error('❌ Database connection failed:', error);
     throw new Error('Database connection failed');
@@ -83,51 +69,12 @@ export async function ensureTablesExist() {
       )
     `);
 
-    // Create doctors table
-    await conn.execute(`
-      CREATE TABLE IF NOT EXISTS doctors (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
-        name VARCHAR(100) NOT NULL,
-        phone VARCHAR(15) NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        employee_id VARCHAR(50) NOT NULL,
-        specialization VARCHAR(100) DEFAULT 'General Medicine',
-        qualification VARCHAR(200) DEFAULT 'MBBS',
-        years_of_experience INT DEFAULT 0,
-        consultation_fee DECIMAL(10,2) DEFAULT 0.00,
-        is_available BOOLEAN DEFAULT TRUE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE
-      )
-    `);
-
-    // Create healthworkers table
-    await conn.execute(`
-      CREATE TABLE IF NOT EXISTS healthworkers (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
-        name VARCHAR(100) NOT NULL,
-        assigned_village VARCHAR(100) NOT NULL,
-        phone VARCHAR(15) NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        employee_id VARCHAR(50) NOT NULL,
-        qualification VARCHAR(200) DEFAULT 'ANM/GNM',
-        shift_timing VARCHAR(50) DEFAULT 'Day Shift',
-        is_on_duty BOOLEAN DEFAULT TRUE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE
-      )
-    `);
-
     console.log('✅ Database tables verified/created');
     
   } catch (error) {
     console.error('❌ Error creating database tables:', error);
     throw error;
+  } finally {
+    await conn.end();
   }
 }

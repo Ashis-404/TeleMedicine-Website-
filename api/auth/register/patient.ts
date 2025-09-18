@@ -37,50 +37,55 @@ export default async function handler(req: any, res: any) {
     
     const conn = await getDbConnection();
     
-    // Check if patient already exists
-    const [existingUsers] = await conn.execute("SELECT id FROM users WHERE phone=? AND role='patient'", [phone]);
-    
-    if ((existingUsers as any[]).length > 0) {
-      return res.status(400).json({ error: "Patient with this phone number already exists" });
+    try {
+      // Check if patient already exists
+      const [existingUsers] = await conn.execute("SELECT id FROM users WHERE phone=? AND role='patient'", [phone]);
+      
+      if ((existingUsers as any[]).length > 0) {
+        return res.status(400).json({ error: "Patient with this phone number already exists" });
+      }
+      
+      // Create user account
+      const [userResult] = await conn.execute(
+        "INSERT INTO users (role, phone, is_verified, is_active) VALUES ('patient', ?, TRUE, TRUE)",
+        [phone]
+      );
+      
+      const userId = (userResult as any).insertId;
+      
+      // Generate medical record number
+      const medicalRecordNumber = `MRN${userId.toString().padStart(6, '0')}`;
+      
+      // Create patient profile
+      await conn.execute(
+        "INSERT INTO patients (user_id, name, age, gender, village, medical_record_number) VALUES (?, ?, ?, ?, ?, ?)",
+        [userId, name, age, gender, village, medicalRecordNumber]
+      );
+      
+      // Generate JWT token
+      const jwt = require('jsonwebtoken');
+      const secret = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+      const token = jwt.sign(
+        { id: userId, role: 'patient', phone }, 
+        secret, 
+        { expiresIn: '7d' }
+      );
+      
+      res.status(201).json({
+        ok: true,
+        token,
+        user: {
+          id: userId,
+          role: 'patient',
+          phone,
+          medical_record_number: medicalRecordNumber
+        },
+        message: "Patient registered successfully"
+      });
+      
+    } finally {
+      await conn.end();
     }
-    
-    // Create user account
-    const [userResult] = await conn.execute(
-      "INSERT INTO users (role, phone, is_verified, is_active) VALUES ('patient', ?, TRUE, TRUE)",
-      [phone]
-    );
-    
-    const userId = (userResult as any).insertId;
-    
-    // Generate medical record number
-    const medicalRecordNumber = `MRN${userId.toString().padStart(6, '0')}`;
-    
-    // Create patient profile
-    await conn.execute(
-      "INSERT INTO patients (user_id, name, age, gender, village, medical_record_number) VALUES (?, ?, ?, ?, ?, ?)",
-      [userId, name, age, gender, village, medicalRecordNumber]
-    );
-    
-    // Generate JWT token
-    const jwt = require('jsonwebtoken');
-    const secret = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
-    const token = jwt.sign(
-      { id: userId, role: 'patient', phone }, 
-      secret, 
-      { expiresIn: '7d' }
-    );
-    
-    res.status(201).json({
-      ok: true,
-      token,
-      user: {
-        id: userId,
-        role: 'patient',
-        phone,
-        medical_record_number: medicalRecordNumber
-      },
-      message: "Patient registered successfully"
-    });
     
   } catch (error) {
     console.error("Registration error:", error);

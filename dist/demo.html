@@ -1,0 +1,1785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Decision Support System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .logo i {
+            font-size: 2rem;
+        }
+        
+        .language-switcher {
+            display: flex;
+            align-items: center;
+        }
+        
+        .language-switcher select {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 140px;
+        }
+        
+        .language-switcher select:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .language-switcher select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        .container { 
+            max-width: 1000px; 
+            margin: 2rem auto;
+            background: var(--card-bg); 
+            border-radius: 20px; 
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .container-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .container-header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .container-header p {
+            margin: 0.5rem 0 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .form-content {
+            padding: 2rem;
+        }
+        
+        .form-section {
+            margin-bottom: 2.5rem;
+            padding: 1.5rem;
+            background: var(--light-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .form-section h2 {
+            color: var(--text-primary);
+            margin: 0 0 1.5rem 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .form-section h2 i {
+            color: var(--primary-color);
+            font-size: 1.25rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        
+        input, select {
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            background: white;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        input:hover, select:hover {
+            border-color: var(--secondary-color);
+        }
+        
+        input[type="text"] {
+            width: 100%;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+        }
+        
+        select {
+            width: 100%;
+            cursor: pointer;
+        }
+        
+        .selected-symptoms {
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #e0f2fe, #f0f9ff);
+            border-radius: 16px;
+            border: 2px solid #0ea5e9;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .selected-symptoms::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #0ea5e9, #06b6d4);
+        }
+        
+        .selected-symptoms h3 {
+            margin: 0 0 1rem 0;
+            color: #0c4a6e;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .selected-symptoms-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        
+        .selected-symptom {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+            animation: fadeInScale 0.3s ease-out;
+        }
+        
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .selected-symptom button {
+            background: none;
+            border: none;
+            color: white;
+            margin-left: 0.5rem;
+            padding: 0.25rem;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.2s ease;
+        }
+        
+        .selected-symptom button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .category {
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            background: white;
+            transition: all 0.2s ease;
+        }
+        
+        .category:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+        }
+        
+        .category h3 {
+            margin: 0 0 1rem 0;
+            color: var(--text-primary);
+            font-size: 1.25rem;
+            font-weight: 600;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .category h3 i {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+        
+        .symptom-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        
+        .symptom-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background: var(--light-bg);
+            border-radius: 12px;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .symptom-item:hover {
+            background: #e0f2fe;
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(37, 99, 235, 0.15);
+        }
+        
+        .symptom-item.selected {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-color: var(--primary-color);
+            color: #1e40af;
+            font-weight: 500;
+        }
+        
+        .symptom-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 0.75rem;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-color);
+        }
+        
+        .symptom-item label {
+            margin: 0;
+            cursor: pointer;
+            flex: 1;
+            font-size: 0.95rem;
+        }
+        
+        .submit-button {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 2rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .submit-button:active {
+            transform: translateY(0);
+        }
+        
+        .submit-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading-spinner {
+            display: none;
+            margin-right: 0.5rem;
+        }
+        
+        .loading .loading-spinner {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .result {
+            margin-top: 2rem;
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+        }
+        
+        .option {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 6px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+        }
+        
+        .option:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+        
+        .option-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .option-type {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+            padding: 0.5rem 1rem;
+            background: var(--light-bg);
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .option-drugs {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            padding: 1rem;
+            border-radius: 12px;
+            font-weight: 500;
+            border: 1px solid #93c5fd;
+        }
+        
+        .option-rationale {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        
+        .option-age-group {
+            background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+            color: #0c4a6e;
+            font-weight: 600;
+            border: 1px solid #7dd3fc;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .option-dosing {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+            color: #166534;
+            font-weight: 600;
+            border: 1px solid #86efac;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .flags {
+            color: var(--danger-color);
+            font-weight: 600;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            border-radius: 12px;
+            border: 2px solid #fca5a5;
+            position: relative;
+        }
+        
+        .flags::before {
+            content: '⚠️';
+            position: absolute;
+            left: 1rem;
+            top: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .flags {
+            padding-left: 3rem;
+        }
+        
+        .safety-list {
+            margin: 1rem 0 0 1.5rem;
+            padding: 0;
+        }
+        
+        .safety-list li {
+            margin: 0.5rem 0;
+            color: var(--danger-color);
+            font-weight: 500;
+        }
+        
+        .evidence {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: var(--light-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .evidence-item {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .evidence-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .evidence-snippet {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            font-size: 1.2rem;
+        }
+        
+        .download-pdf-button {
+            display: block !important;
+            margin: 2rem auto !important;
+            padding: 1rem 2rem !important;
+            background: linear-gradient(135deg, var(--success-color), #059669) !important;
+            color: white !important;
+            text-decoration: none !important;
+            border-radius: 16px !important;
+            font-weight: 600 !important;
+            font-size: 1.1rem !important;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+            transition: all 0.2s ease !important;
+            width: fit-content !important;
+            text-align: center;
+        }
+        
+        .download-pdf-button:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4) !important;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: var(--text-secondary);
+            font-style: italic;
+            padding: 2rem;
+            background: var(--light-bg);
+            border-radius: 12px;
+            border: 2px dashed var(--border-color);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                border-radius: 16px;
+            }
+            
+            .container-header {
+                padding: 1.5rem;
+            }
+            
+            .container-header h1 {
+                font-size: 2rem;
+            }
+            
+            .form-content {
+                padding: 1.5rem;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .symptom-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .selected-symptoms-list {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-user-md"></i>
+                <span data-translate="app_name">HealthBridge</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div class="language-switcher">
+                    <label for="language-select" class="sr-only">Select Language</label>
+                    <select id="language-select" onchange="changeLanguage(this.value)">
+                        <option value="en">English</option>
+                        <option value="hi">हिंदी (Hindi)</option>
+                        <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+                    </select>
+                </div>
+                <button id="logoutBtn" onclick="logoutPatient()" style="display: none; padding: 8px 16px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 20px; font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.2s;">
+                    <i class="fas fa-sign-out-alt"></i> <span data-translate="logout">Logout</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="container-header">
+            <h1><i class="fas fa-stethoscope"></i> <span data-translate="page_title">Clinical Decision Support</span></h1>
+            <p data-translate="page_subtitle">Intelligent symptom analysis and medication recommendations</p>
+        </div>
+        
+        <div class="form-content">
+            <div id="assessment-form">
+                <div class="form-section">
+                    <h2><i class="fas fa-user"></i> <span data-translate="patient_info">Patient Information</span></h2>
+                    
+                    <!-- Patient Session Info (will be populated if logged in) -->
+                    <div id="patientSessionCard" style="display: none; margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #e8f5e8 0%, #f0f9ff 100%); border-radius: 12px; border-left: 4px solid #10b981;">
+                        <h3 style="margin: 0 0 10px 0; color: #059669; font-size: 16px;"><i class="fas fa-user-check"></i> Logged in Patient</h3>
+                        <div id="patientSessionDetails" style="font-size: 14px; color: #374151;">
+                            <!-- Patient details will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="patientName"><i class="fas fa-id-card"></i> <span data-translate="patient_name">Patient Name</span></label>
+                            <input type="text" id="patientName" required data-translate-placeholder="enter_patient_name">
+                        </div>
+                        <div class="form-group">
+                            <label for="age"><i class="fas fa-calendar-alt"></i> <span data-translate="age">Age</span></label>
+                            <input type="number" id="age" min="0" max="120" required data-translate-placeholder="age_in_years">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="gender"><i class="fas fa-venus-mars"></i> <span data-translate="gender">Gender</span></label>
+                            <select id="gender" required>
+                                <option value="" data-translate="select_gender">Select gender</option>
+                                <option value="male" data-translate="male">Male</option>
+                                <option value="female" data-translate="female">Female</option>
+                                <option value="other" data-translate="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="weight"><i class="fas fa-weight"></i> <span data-translate="weight">Weight (kg)</span></label>
+                            <input type="number" id="weight" min="0" max="300" step="0.1" required data-translate-placeholder="weight_in_kg">
+                        </div>
+                        <div class="form-group">
+                            <label for="height"><i class="fas fa-ruler-vertical"></i> <span data-translate="height">Height (cm)</span></label>
+                            <input type="number" id="height" min="0" max="300" step="1" required data-translate-placeholder="height_in_cm">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2><i class="fas fa-heartbeat"></i> <span data-translate="symptoms">Symptoms</span></h2>
+                    <div class="selected-symptoms">
+                        <h3><i class="fas fa-check-circle"></i> <span data-translate="selected_symptoms">Selected Symptoms</span></h3>
+                        <div class="selected-symptoms-list" id="selected-symptoms-list">
+                            <div class="empty-state" data-translate="no_symptoms_selected">No symptoms selected</div>
+                        </div>
+                    </div>
+                    <div id="symptoms-container">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <button class="submit-button" onclick="submitAssessment()">
+                    <i class="fas fa-spinner loading-spinner"></i>
+                    <i class="fas fa-search"></i>
+                    <span data-translate="analyze_button">Analyze Symptoms & Get Recommendations</span>
+                </button>
+            </div>
+            <div class="result" id="result"></div>
+        </div>
+    </div>
+    <script>
+        // Translation system
+        let currentLanguage = 'en';
+        
+        const translations = {
+            en: {
+                app_name: "HealthBridge",
+                page_title: "Clinical Decision Support",
+                page_subtitle: "Intelligent symptom analysis and medication recommendations",
+                patient_info: "Patient Information",
+                patient_name: "Patient Name",
+                logged_in_patient: "Logged in Patient",
+                patient_session: "Patient Session",
+                login_time: "Login Time",
+                logout: "Logout",
+                age: "Age",
+                gender: "Gender",
+                weight: "Weight (kg)",
+                height: "Height (cm)",
+                symptoms: "Symptoms",
+                selected_symptoms: "Selected Symptoms",
+                no_symptoms_selected: "No symptoms selected",
+                analyze_button: "Analyze Symptoms & Get Recommendations",
+                enter_patient_name: "Enter patient name",
+                age_in_years: "Age in years",
+                weight_in_kg: "Weight in kg",
+                height_in_cm: "Height in cm",
+                select_gender: "Select gender",
+                male: "Male",
+                female: "Female",
+                other: "Other",
+                processing: "Processing...",
+                loadingSymptoms: "Loading symptoms...",
+                errorLoadingSymptoms: "Error loading symptoms",
+                analyzing_symptoms: "Analyzing Symptoms...",
+                analysis_wait: "Please wait while we process your request and generate recommendations.",
+                clinical_assessment: "Clinical Assessment Results",
+                download_pdf: "Download Medical Prescription PDF",
+                pdf_info: "The complete prescription with patient details and medications will be available in the PDF",
+                differential_considerations: "Differential Considerations",
+                clinical_rationale: "Clinical Rationale:",
+                age_group: "Age Group:",
+                dosing: "Dosing:",
+                safety_considerations: "Safety Considerations:",
+                evidence_base: "Evidence Base:",
+                important_note: "Important Clinical Note",
+                error: "Error",
+                error_processing: "Unable to process your request. Please try again or contact support.",
+                analysis_completed: "Analysis completed successfully!",
+                failed_processing: "Failed to process your request",
+                enter_all_info: "Please enter all required patient information",
+                select_symptom: "Please select at least one symptom",
+                // Symptom categories
+                general: "General",
+                respiratory: "Respiratory", 
+                ent_allergy: "ENT & Allergy",
+                gastrointestinal: "Gastrointestinal",
+                chronic_conditions: "Chronic Conditions",
+                // Symptoms
+                fever: "Fever",
+                fatigue: "Fatigue",
+                body_ache: "Body Aches",
+                headache: "Headache",
+                sore_throat: "Sore Throat",
+                cough: "Cough",
+                wheezing: "Wheezing",
+                shortness_breath: "Shortness of Breath",
+                chest_tightness: "Chest Tightness",
+                nasal_congestion: "Nasal Congestion",
+                runny_nose: "Runny Nose",
+                sneezing: "Sneezing",
+                itchy_eyes: "Itchy Eyes",
+                tonsillar_symptoms: "Swollen/White Tonsils",
+                nausea: "Nausea",
+                vomiting: "Vomiting",
+                stomach_pain: "Stomach Pain",
+                decreased_appetite: "Decreased Appetite",
+                // Chronic Conditions symptoms
+                diabetes_symptoms: "Diabetes Symptoms",
+                hypertension_symptoms: "High Blood Pressure Symptoms",
+                high_cholesterol: "High Cholesterol",
+                // Additional dynamic content translations
+                type: "Type:",
+                medications: "Medications:",
+                treatment_options: "Treatment Options",
+                recommendation: "Recommendation",
+                no_results: "No results found",
+                server_error: "Server error occurred",
+                loading_error: "Error loading content",
+                invalid_input: "Invalid input provided"
+            },
+            hi: {
+                app_name: "हेल्थब्रिज",
+                page_title: "क्लीनिकल निर्णय सहायता",
+                page_subtitle: "बुद्धिमान लक्षण विश्लेषण और दवा की सिफारिशें",
+                patient_info: "मरीज़ की जानकारी",
+                patient_name: "मरीज़ का नाम",
+                logged_in_patient: "लॉग इन मरीज़",
+                patient_session: "मरीज़ सेशन",
+                login_time: "लॉग इन समय",
+                logout: "लॉग आउट",
+                age: "उम्र",
+                gender: "लिंग",
+                weight: "वजन (किलो)",
+                height: "ऊंचाई (सेमी)",
+                symptoms: "लक्षण",
+                selected_symptoms: "चुने गए लक्षण",
+                no_symptoms_selected: "कोई लक्षण नहीं चुना गया",
+                analyze_button: "लक्षणों का विश्लेषण करें और सिफारिशें प्राप्त करें",
+                enter_patient_name: "मरीज़ का नाम दर्ज करें",
+                age_in_years: "वर्षों में उम्र",
+                weight_in_kg: "किलो में वजन",
+                height_in_cm: "सेमी में ऊंचाई",
+                select_gender: "लिंग चुनें",
+                male: "पुरुष",
+                female: "महिला",
+                other: "अन्य",
+                processing: "प्रसंस्करण...",
+                loadingSymptoms: "लक्षण लोड हो रहे हैं...",
+                errorLoadingSymptoms: "लक्षण लोड करने में त्रुटि",
+                analyzing_symptoms: "लक्षणों का विश्लेषण...",
+                analysis_wait: "कृपया प्रतीक्षा करें जब हम आपके अनुरोध को संसाधित करते हैं और सिफारिशें तैयार करते हैं।",
+                clinical_assessment: "क्लीनिकल मूल्यांकन परिणाम",
+                download_pdf: "चिकित्सा नुस्खा पीडीएफ डाउनलोड करें",
+                pdf_info: "मरीज़ की जानकारी और दवाओं के साथ पूरा नुस्खा पीडीएफ में उपलब्ध होगा",
+                differential_considerations: "भेदभावपूर्ण विचार",
+                clinical_rationale: "क्लीनिकल तर्क:",
+                age_group: "आयु समूह:",
+                dosing: "खुराक:",
+                safety_considerations: "सुरक्षा विचार:",
+                evidence_base: "साक्ष्य आधार:",
+                important_note: "महत्वपूर्ण क्लीनिकल नोट",
+                error: "त्रुटि",
+                error_processing: "आपके अनुरोध को संसाधित करने में असमर्थ। कृपया पुनः प्रयास करें या सहायता से संपर्क करें।",
+                analysis_completed: "विश्लेषण सफलतापूर्वक पूरा हुआ!",
+                failed_processing: "आपके अनुरोध को संसाधित करने में विफल",
+                enter_all_info: "कृपया सभी आवश्यक मरीज़ की जानकारी दर्ज करें",
+                select_symptom: "कृपया कम से कम एक लक्षण चुनें",
+                // Symptom categories
+                general: "सामान्य",
+                respiratory: "श्वसन",
+                ent_allergy: "कान, नाक, गला और एलर्जी",
+                gastrointestinal: "पाचन तंत्र",
+                chronic_conditions: "पुरानी बीमारियां",
+                // Symptoms
+                fever: "बुखार",
+                fatigue: "थकान",
+                body_ache: "शरीर में दर्द",
+                headache: "सिरदर्द",
+                sore_throat: "गले में खराश",
+                cough: "खांसी",
+                wheezing: "सांस में घरघराहट",
+                shortness_breath: "सांस लेने में तकलीफ",
+                chest_tightness: "छाती में जकड़न",
+                nasal_congestion: "नाक की रुकावट",
+                runny_nose: "बहती नाक",
+                sneezing: "छींकना",
+                itchy_eyes: "आंखों में खुजली",
+                tonsillar_symptoms: "सूजे/सफेद टॉन्सिल",
+                nausea: "मतली",
+                vomiting: "उल्टी",
+                stomach_pain: "पेट दर्द",
+                decreased_appetite: "भूख न लगना",
+                // Chronic Conditions symptoms
+                diabetes_symptoms: "मधुमेह के लक्षण",
+                hypertension_symptoms: "उच्च रक्तचाप के लक्षण",
+                high_cholesterol: "उच्च कोलेस्ट्रॉल",
+                // Additional dynamic content translations
+                type: "प्रकार:",
+                medications: "दवाएं:",
+                treatment_options: "उपचार विकल्प",
+                recommendation: "सिफारिश",
+                no_results: "कोई परिणाम नहीं मिला",
+                server_error: "सर्वर त्रुटि हुई",
+                loading_error: "सामग्री लोड करने में त्रुटि",
+                invalid_input: "अमान्य इनपुट प्रदान किया गया"
+            },
+            pa: {
+                app_name: "ਮੈਡੀਅਸਿਸਟ",
+                page_title: "ਕਲੀਨਿਕਲ ਫੈਸਲਾ ਸਹਾਇਤਾ",
+                page_subtitle: "ਬੁੱਧੀਮਾਨ ਲੱਛਣ ਵਿਸ਼ਲੇਸ਼ਣ ਅਤੇ ਦਵਾਈ ਦੀਆਂ ਸਿਫ਼ਾਰਿਸ਼ਾਂ",
+                patient_info: "ਮਰੀਜ਼ ਦੀ ਜਾਣਕਾਰੀ",
+                patient_name: "ਮਰੀਜ਼ ਦਾ ਨਾਮ",
+                logged_in_patient: "ਲਾਗ ਇਨ ਮਰੀਜ਼",
+                patient_session: "ਮਰੀਜ਼ ਸੈਸ਼ਨ",
+                login_time: "ਲਾਗ ਇਨ ਸਮਾਂ",
+                logout: "ਲਾਗ ਆਊਟ",
+                age: "ਉਮਰ",
+                gender: "ਲਿੰਗ",
+                weight: "ਭਾਰ (ਕਿਲੋ)",
+                height: "ਉਚਾਈ (ਸੈਮੀ)",
+                symptoms: "ਲੱਛਣ",
+                selected_symptoms: "ਚੁਣੇ ਗਏ ਲੱਛਣ",
+                no_symptoms_selected: "ਕੋਈ ਲੱਛਣ ਨਹੀਂ ਚੁਣਿਆ ਗਿਆ",
+                analyze_button: "ਲੱਛਣਾਂ ਦਾ ਵਿਸ਼ਲੇਸ਼ਣ ਕਰੋ ਅਤੇ ਸਿਫ਼ਾਰਿਸ਼ਾਂ ਪ੍ਰਾਪਤ ਕਰੋ",
+                enter_patient_name: "ਮਰੀਜ਼ ਦਾ ਨਾਮ ਦਰਜ ਕਰੋ",
+                age_in_years: "ਸਾਲਾਂ ਵਿੱਚ ਉਮਰ",
+                weight_in_kg: "ਕਿਲੋ ਵਿੱਚ ਭਾਰ",
+                height_in_cm: "ਸੈਮੀ ਵਿੱਚ ਉਚਾਈ",
+                select_gender: "ਲਿੰਗ ਚੁਣੋ",
+                male: "ਮਰਦ",
+                female: "ਔਰਤ",
+                other: "ਹੋਰ",
+                processing: "ਪ੍ਰਕਿਰਿਆ...",
+                loadingSymptoms: "ਲੱਛਣ ਲੋਡ ਹੋ ਰਹੇ ਹਨ...",
+                errorLoadingSymptoms: "ਲੱਛਣ ਲੋਡ ਕਰਨ ਵਿੱਚ ਤ੍ਰੁਟੀ",
+                analyzing_symptoms: "ਲੱਛਣਾਂ ਦਾ ਵਿਸ਼ਲੇਸ਼ਣ...",
+                analysis_wait: "ਕਿਰਪਾ ਕਰਕੇ ਇੰਤਜ਼ਾਰ ਕਰੋ ਜਦੋਂ ਅਸੀਂ ਤੁਹਾਡੀ ਬੇਨਤੀ ਦੀ ਪ੍ਰਕਿਰਿਆ ਕਰਦੇ ਹਾਂ ਅਤੇ ਸਿਫ਼ਾਰਿਸ਼ਾਂ ਤਿਆਰ ਕਰਦੇ ਹਾਂ।",
+                clinical_assessment: "ਕਲੀਨਿਕਲ ਮੁਲਾਂਕਣ ਨਤੀਜੇ",
+                download_pdf: "ਮੈਡੀਕਲ ਨੁਸਖਾ ਪੀਡੀਐਫ ਡਾਊਨਲੋਡ ਕਰੋ",
+                pdf_info: "ਮਰੀਜ਼ ਦੀ ਜਾਣਕਾਰੀ ਅਤੇ ਦਵਾਈਆਂ ਦੇ ਨਾਲ ਪੂਰਾ ਨੁਸਖਾ ਪੀਡੀਐਫ ਵਿੱਚ ਉਪਲਬਧ ਹੋਵੇਗਾ",
+                differential_considerations: "ਵਿਭਿੰਨਤਾ ਵਿਚਾਰ",
+                clinical_rationale: "ਕਲੀਨਿਕਲ ਤਰਕ:",
+                age_group: "ਉਮਰ ਸਮੂਹ:",
+                dosing: "ਖੁਰਾਕ:",
+                safety_considerations: "ਸੁਰੱਖਿਆ ਵਿਚਾਰ:",
+                evidence_base: "ਸਬੂਤ ਆਧਾਰ:",
+                important_note: "ਮਹੱਤਵਪੂਰਨ ਕਲੀਨਿਕਲ ਨੋਟ",
+                error: "ਗਲਤੀ",
+                error_processing: "ਤੁਹਾਡੀ ਬੇਨਤੀ ਦੀ ਪ੍ਰਕਿਰਿਆ ਕਰਨ ਵਿੱਚ ਅਸਮਰੱਥ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ ਜਾਂ ਸਹਾਇਤਾ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।",
+                analysis_completed: "ਵਿਸ਼ਲੇਸ਼ਣ ਸਫਲਤਾਪੂਰਵਕ ਪੂਰਾ ਹੋਇਆ!",
+                failed_processing: "ਤੁਹਾਡੀ ਬੇਨਤੀ ਦੀ ਪ੍ਰਕਿਰਿਆ ਵਿੱਚ ਅਸਫਲ",
+                enter_all_info: "ਕਿਰਪਾ ਕਰਕੇ ਸਾਰੀ ਲੋੜੀਂਦੀ ਮਰੀਜ਼ ਦੀ ਜਾਣਕਾਰੀ ਦਰਜ ਕਰੋ",
+                select_symptom: "ਕਿਰਪਾ ਕਰਕੇ ਘੱਟੋ ਘੱਟ ਇੱਕ ਲੱਛਣ ਚੁਣੋ",
+                // Symptom categories
+                general: "ਆਮ",
+                respiratory: "ਸਾਹ",
+                ent_allergy: "ਕੰਨ, ਨੱਕ, ਗਲਾ ਅਤੇ ਐਲਰਜੀ",
+                gastrointestinal: "ਪਾਚਨ ਪ੍ਰਣਾਲੀ",
+                chronic_conditions: "ਪੁਰਾਣੀਆਂ ਬਿਮਾਰੀਆਂ",
+                // Symptoms
+                fever: "ਬੁਖਾਰ",
+                fatigue: "ਥਕਾਵਟ",
+                body_ache: "ਸਰੀਰ ਵਿੱਚ ਦਰਦ",
+                headache: "ਸਿਰ ਦਰਦ",
+                sore_throat: "ਗਲੇ ਵਿੱਚ ਖਰਾਸ਼",
+                cough: "ਖੰਘ",
+                wheezing: "ਸਾਹ ਵਿੱਚ ਘਰਘਰਾਹਟ",
+                shortness_breath: "ਸਾਹ ਲੈਣ ਵਿੱਚ ਮੁਸ਼ਕਿਲ",
+                chest_tightness: "ਛਾਤੀ ਵਿੱਚ ਕਸਾਵ",
+                nasal_congestion: "ਨੱਕ ਦੀ ਰੁਕਾਵਟ",
+                runny_nose: "ਵਗਦੀ ਨੱਕ",
+                sneezing: "ਛਿੱਕਣਾ",
+                itchy_eyes: "ਅੱਖਾਂ ਵਿੱਚ ਖਾਰਸ਼",
+                tonsillar_symptoms: "ਸੁੱਜੇ/ਚਿੱਟੇ ਟਾਂਸਿਲ",
+                nausea: "ਜੀ ਮਿਚਲਾਉਣਾ",
+                vomiting: "ਉਲਟੀ",
+                stomach_pain: "ਪੇਟ ਦਰਦ",
+                decreased_appetite: "ਭੁੱਖ ਨਾ ਲੱਗਣਾ",
+                // Chronic Conditions symptoms
+                diabetes_symptoms: "ਸ਼ੂਗਰ ਦੇ ਲੱਛਣ",
+                hypertension_symptoms: "ਹਾਈ ਬਲੱਡ ਪ੍ਰੈਸ਼ਰ ਦੇ ਲੱਛਣ",
+                high_cholesterol: "ਹਾਈ ਕੋਲੈਸਟ੍ਰੋਲ",
+                // Additional dynamic content translations
+                type: "ਕਿਸਮ:",
+                medications: "ਦਵਾਈਆਂ:",
+                treatment_options: "ਇਲਾਜ ਦੇ ਵਿਕਲਪ",
+                recommendation: "ਸਿਫ਼ਾਰਿਸ਼",
+                no_results: "ਕੋਈ ਨਤੀਜਾ ਨਹੀਂ ਮਿਲਿਆ",
+                server_error: "ਸਰਵਰ ਵਿੱਚ ਗਲਤੀ ਹੋਈ",
+                loading_error: "ਸਮੱਗਰੀ ਲੋਡ ਕਰਨ ਵਿੱਚ ਗਲਤੀ",
+                invalid_input: "ਗਲਤ ਇਨਪੁੱਟ ਪ੍ਰਦਾਨ ਕੀਤਾ ਗਿਆ"
+            }
+        };
+        
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('selectedLanguage', lang);
+            translatePage();
+        }
+        
+        function translatePage() {
+            const elements = document.querySelectorAll('[data-translate]');
+            elements.forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                    element.textContent = translations[currentLanguage][key];
+                }
+            });
+            
+            // Translate placeholders
+            const placeholderElements = document.querySelectorAll('[data-translate-placeholder]');
+            placeholderElements.forEach(element => {
+                const key = element.getAttribute('data-translate-placeholder');
+                if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                    element.setAttribute('placeholder', translations[currentLanguage][key]);
+                }
+            });
+            
+            // Translate select options
+            const selectOptions = document.querySelectorAll('option[data-translate]');
+            selectOptions.forEach(option => {
+                const key = option.getAttribute('data-translate');
+                if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                    option.textContent = translations[currentLanguage][key];
+                }
+            });
+            
+            // Update symptom categories and symptoms if they are displayed
+            if (Object.keys(availableSymptoms).length > 0) {
+                displaySymptomCategories();
+            }
+            
+            // Update selected symptoms display
+            updateSelectedSymptomsList();
+            
+            // Update button text if it exists
+            const submitButton = document.querySelector('.submit-button span[data-translate="analyze_button"]');
+            if (submitButton && translations[currentLanguage] && translations[currentLanguage].analyze_button) {
+                submitButton.textContent = translations[currentLanguage].analyze_button;
+            }
+            
+            // Force refresh any visible results to use new language
+            const resultContainer = document.getElementById('result');
+            if (resultContainer && resultContainer.innerHTML && resultContainer.innerHTML.trim() !== '') {
+                // If there are results displayed, we could re-render them in the new language
+                // But since results contain backend data, we'll just update the static labels
+                updateResultsLanguage();
+            }
+        }
+        
+        function updateResultsLanguage() {
+            // This function can be called to update any visible results with current language
+            // For now, it will just update any static text elements in results
+            const resultElements = document.querySelectorAll('#result [data-translate]');
+            resultElements.forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                    element.textContent = translations[currentLanguage][key];
+                }
+            });
+        }
+        
+        // Load saved language preference
+        function loadLanguagePreference() {
+            const savedLanguage = localStorage.getItem('selectedLanguage');
+            if (savedLanguage && translations[savedLanguage]) {
+                currentLanguage = savedLanguage;
+                document.getElementById('language-select').value = savedLanguage;
+                translatePage();
+            }
+        }
+
+        
+        let availableSymptoms = {};
+        let selectedSymptoms = new Set();
+
+        // Fetch available symptoms from the backend
+        async function loadSymptoms() {
+            try {
+                const response = await fetch('/symptoms');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch symptoms from server');
+                }
+                availableSymptoms = await response.json();
+                console.log('Loaded symptoms from server:', availableSymptoms);
+            } catch (error) {
+                console.warn('Failed to load from server, using default symptoms:', error);
+                // Fallback to default symptoms if server fails
+                availableSymptoms = {
+                    "General": [
+                        {"id": "fever", "text": "Fever", "keywords": ["fever", "high temperature"]},
+                        {"id": "fatigue", "text": "Fatigue", "keywords": ["fatigue", "tiredness"]},
+                        {"id": "body_ache", "text": "Body Aches", "keywords": ["body ache", "muscle pain"]},
+                        {"id": "headache", "text": "Headache", "keywords": ["headache"]}
+                    ],
+                    "Respiratory": [
+                        {"id": "sore_throat", "text": "Sore Throat", "keywords": ["sore throat"]},
+                        {"id": "cough", "text": "Cough", "keywords": ["cough", "coughing"]},
+                        {"id": "wheezing", "text": "Wheezing", "keywords": ["wheezing"]},
+                        {"id": "shortness_breath", "text": "Shortness of Breath", "keywords": ["shortness of breath", "difficulty breathing"]},
+                        {"id": "chest_tightness", "text": "Chest Tightness", "keywords": ["chest tightness"]}
+                    ],
+                    "ENT & Allergy": [
+                        {"id": "nasal_congestion", "text": "Nasal Congestion", "keywords": ["nasal congestion", "congestion"]},
+                        {"id": "runny_nose", "text": "Runny Nose", "keywords": ["runny nose"]},
+                        {"id": "sneezing", "text": "Sneezing", "keywords": ["sneezing"]},
+                        {"id": "itchy_eyes", "text": "Itchy Eyes", "keywords": ["itchy eyes", "watery eyes"]},
+                        {"id": "tonsillar_symptoms", "text": "Swollen/White Tonsils", "keywords": ["tonsil", "tonsillar", "white patches"]}
+                    ],
+                    "Gastrointestinal": [
+                        {"id": "nausea", "text": "Nausea", "keywords": ["nausea"]},
+                        {"id": "vomiting", "text": "Vomiting", "keywords": ["vomiting", "emesis"]},
+                        {"id": "stomach_pain", "text": "Stomach Pain", "keywords": ["stomach pain"]},
+                        {"id": "decreased_appetite", "text": "Decreased Appetite", "keywords": ["decreased appetite"]}
+                    ]
+                };
+            }
+
+            if (Object.keys(availableSymptoms).length === 0) {
+                const errorText = getTranslatedText('error', 'Error');
+                const serverErrorText = getTranslatedText('server_error', 'No symptoms available. Please check the server.');
+                document.getElementById('symptoms-container').innerHTML = 
+                    `<div class="category"><h3><i class="fas fa-exclamation-triangle"></i> ${errorText}</h3><p>${serverErrorText}</p></div>`;
+                return;
+            }
+
+            try {
+                displaySymptomCategories();
+                console.log('Successfully displayed symptom categories');
+            } catch (error) {
+                console.error('Error displaying symptoms:', error);
+                const errorText = getTranslatedText('error', 'Error');
+                const loadingErrorText = getTranslatedText('loading_error', 'Failed to display symptoms');
+                document.getElementById('symptoms-container').innerHTML = 
+                    `<div class="category"><h3><i class="fas fa-exclamation-triangle"></i> ${errorText}</h3><p>${loadingErrorText}: ${error.message}</p></div>`;
+            }
+        }
+
+        // Get category icons and translate category names
+        function getCategoryIcon(category) {
+            const icons = {
+                'General': 'fas fa-thermometer-half',
+                'Respiratory': 'fas fa-lungs',
+                'ENT & Allergy': 'fas fa-head-side-mask',
+                'Gastrointestinal': 'fas fa-stomach',
+                'Chronic Conditions': 'fas fa-heartbeat'
+            };
+            return icons[category] || 'fas fa-notes-medical';
+        }
+        
+        function translateCategoryName(category) {
+            const categoryMap = {
+                'General': 'general',
+                'Respiratory': 'respiratory',
+                'ENT & Allergy': 'ent_allergy',
+                'Gastrointestinal': 'gastrointestinal',
+                'Chronic Conditions': 'chronic_conditions'
+            };
+            const key = categoryMap[category];
+            return key && translations[currentLanguage] && translations[currentLanguage][key] 
+                ? translations[currentLanguage][key] 
+                : category;
+        }
+        
+        function translateSymptomName(symptomId, originalText) {
+            if (translations[currentLanguage] && translations[currentLanguage][symptomId]) {
+                return translations[currentLanguage][symptomId];
+            }
+            return originalText;
+        }
+
+        function displaySymptomCategories() {
+            const container = document.getElementById('symptoms-container');
+            container.innerHTML = '';
+
+            for (const [category, symptoms] of Object.entries(availableSymptoms)) {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'category';
+                const translatedCategory = translateCategoryName(category);
+                categoryDiv.innerHTML = `
+                    <h3><i class="${getCategoryIcon(category)}"></i> ${translatedCategory}</h3>
+                    <div class="symptom-group">
+                        ${symptoms.map(symptom => {
+                            const translatedSymptom = translateSymptomName(symptom.id, symptom.text);
+                            return `
+                                <div class="symptom-item ${selectedSymptoms.has(symptom.id) ? 'selected' : ''}" onclick="toggleSymptomFromItem('${symptom.id}', '${symptom.text}')">
+                                    <input type="checkbox" id="${symptom.id}" 
+                                           onchange="toggleSymptom('${symptom.id}', '${symptom.text}')"
+                                           ${selectedSymptoms.has(symptom.id) ? 'checked' : ''}>
+                                    <label for="${symptom.id}">${translatedSymptom}</label>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+                container.appendChild(categoryDiv);
+            }
+        }
+
+        function toggleSymptomFromItem(id, text) {
+            const checkbox = document.getElementById(id);
+            checkbox.checked = !checkbox.checked;
+            toggleSymptom(id, text);
+        }
+
+        function toggleSymptom(id, text) {
+            if (selectedSymptoms.has(id)) {
+                selectedSymptoms.delete(id);
+            } else {
+                selectedSymptoms.add(id);
+            }
+            updateSelectedSymptomsList();
+            displaySymptomCategories(); // Refresh to update selected state
+        }
+
+        function updateSelectedSymptomsList() {
+            const container = document.getElementById('selected-symptoms-list');
+            container.innerHTML = '';
+
+            if (selectedSymptoms.size === 0) {
+                const emptyText = translations[currentLanguage] && translations[currentLanguage].no_symptoms_selected 
+                    ? translations[currentLanguage].no_symptoms_selected 
+                    : 'No symptoms selected';
+                container.innerHTML = `<div class="empty-state">${emptyText}</div>`;
+                return;
+            }
+
+            for (const symptomId of selectedSymptoms) {
+                const originalText = findSymptomText(symptomId);
+                const translatedText = translateSymptomName(symptomId, originalText);
+                const span = document.createElement('span');
+                span.className = 'selected-symptom';
+                span.innerHTML = `
+                    ${translatedText}
+                    <button onclick="toggleSymptom('${symptomId}', '${originalText}')" aria-label="Remove symptom">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                container.appendChild(span);
+            }
+        }
+
+        function findSymptomText(id) {
+            for (const category of Object.values(availableSymptoms)) {
+                const symptom = category.find(s => s.id === id);
+                if (symptom) return symptom.text;
+            }
+            return id;
+        }
+
+        async function submitAssessment() {
+            const button = document.querySelector('.submit-button');
+            const patientName = document.getElementById('patientName').value;
+            const age = document.getElementById('age').value;
+            const gender = document.getElementById('gender').value;
+            const weight = document.getElementById('weight').value;
+            const heightCm = document.getElementById('height').value;
+            
+            if (!patientName || !age || !gender || !weight || !heightCm) {
+                showNotification('enter_all_info', 'error');
+                return;
+            }
+
+            if (selectedSymptoms.size === 0) {
+                showNotification('select_symptom', 'error');
+                return;
+            }
+
+            // Show loading state
+            button.classList.add('loading');
+            button.disabled = true;
+            const processingText = getTranslatedText('processing', 'Processing...');
+            button.innerHTML = `
+                <i class="fas fa-spinner loading-spinner"></i>
+                ${processingText}
+            `;
+
+            // Get both symptom keywords and full text for sending to the server
+            const selectedSymptomDetails = Array.from(selectedSymptoms)
+                .map(id => {
+                    for (const category of Object.values(availableSymptoms)) {
+                        const symptom = category.find(s => s.id === id);
+                        if (symptom) return {
+                            keyword: symptom.keywords[0],
+                            text: symptom.text
+                        };
+                    }
+                    return { keyword: id, text: id };
+                });
+            
+            const symptoms = selectedSymptomDetails.map(s => s.keyword).join(', ');
+            const symptomTexts = selectedSymptomDetails.map(s => s.text).join(', ');
+
+            // Convert height from cm to meters for the backend
+            const heightMeters = parseFloat(heightCm) / 100;
+
+            const data = {
+                patientName: patientName,
+                symptoms: symptoms,
+                symptomTexts: symptomTexts,
+                age: parseInt(age),
+                sex: gender,
+                weight: parseFloat(weight),
+                height: heightMeters
+            };
+
+            const analyzingText = translations[currentLanguage].analyzing_symptoms || 'Analyzing Symptoms...';
+            const waitText = translations[currentLanguage].analysis_wait || 'Please wait while we process your request and generate recommendations.';
+            
+            document.getElementById('result').innerHTML = `
+                <div class="option" style="text-align: center;">
+                    <div class="option-title">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        ${analyzingText}
+                    </div>
+                    <div class="option-rationale">${waitText}</div>
+                </div>
+            `;
+            
+            try {
+                console.log('Sending data:', data);
+                const res = await fetch('/assess', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const json = await res.json();
+                displayResults(json, data);
+                showNotification('analysis_completed', 'success');
+            } catch (error) {
+                console.error('Error submitting assessment:', error);
+                const errorTitle = getTranslatedText('error', 'Error');
+                const errorText = getTranslatedText('error_processing', 'Unable to process your request. Please try again or contact support.');
+                
+                document.getElementById('result').innerHTML = `
+                    <div class="option" style="border-left-color: var(--danger-color)">
+                        <div class="option-title"><i class="fas fa-exclamation-triangle"></i> ${errorTitle}</div>
+                        <div class="option-rationale">${errorText}</div>
+                    </div>`;
+                showNotification('failed_processing', 'error');
+            } finally {
+                // Reset button state
+                button.classList.remove('loading');
+                button.disabled = false;
+                const buttonText = getTranslatedText('analyze_button', 'Analyze Symptoms & Get Recommendations');
+                button.innerHTML = `
+                    <i class="fas fa-search"></i>
+                    ${buttonText}
+                `;
+            }
+        }
+
+        function displayResults(json, data) {
+            const clinicalTitle = translations[currentLanguage].clinical_assessment || 'Clinical Assessment Results';
+            const downloadPdfText = translations[currentLanguage].download_pdf || 'Download Medical Prescription PDF';
+            const pdfInfoText = translations[currentLanguage].pdf_info || 'The complete prescription with patient details and medications will be available in the PDF';
+            
+            let html = `
+                <h2 style="margin-top: 2rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.75rem;">
+                    <i class="fas fa-chart-line"></i> ${clinicalTitle}
+                </h2>`;
+
+            const differentialTitle = translations[currentLanguage].differential_considerations || 'Differential Considerations';
+            if (json.differential && json.differential.length > 0) {
+                html += `<div class="option">
+                    <div class="option-title"><i class="fas fa-search-plus"></i> ${differentialTitle}</div>
+                    <div class="option-rationale">${json.differential.join(', ')}</div>
+                </div>`;
+            }
+
+            if (json.options && json.options.length > 0) {
+                const clinicalRationaleText = translations[currentLanguage].clinical_rationale || 'Clinical Rationale:';
+                const ageGroupText = translations[currentLanguage].age_group || 'Age Group:';
+                const dosingText = translations[currentLanguage].dosing || 'Dosing:';
+                const safetyText = translations[currentLanguage].safety_considerations || 'Safety Considerations:';
+                const evidenceText = translations[currentLanguage].evidence_base || 'Evidence Base:';
+                const typeText = translations[currentLanguage].type || 'Type:';
+                const medicationsText = translations[currentLanguage].medications || 'Medications:';
+                
+                // Add detailed clinical information
+                json.options.forEach(opt => {
+                    html += `<div class="option">
+                        <div class="option-title"><i class="fas fa-prescription-bottle-alt"></i> ${opt.title}</div>
+                        <div class="option-type"><i class="fas fa-tag"></i> ${typeText} ${opt.type.replace(/_/g, ' ')}</div>
+                        ${opt.age_group ? `<div class="option-age-group"><i class="fas fa-users"></i> ${ageGroupText} ${opt.age_group.charAt(0).toUpperCase() + opt.age_group.slice(1)}</div>` : ''}
+                        <div class="option-drugs"><i class="fas fa-pills"></i> ${medicationsText} ${opt.drugs.join(', ')}</div>
+                        <div class="option-rationale"><i class="fas fa-clipboard-check"></i> <strong>${clinicalRationaleText}</strong> ${opt.rationale}</div>
+                        ${opt.dosing ? `<div class="option-dosing"><i class="fas fa-clock"></i> ${dosingText} ${opt.dosing}</div>` : ''}
+                        ${opt.safety_flags && opt.safety_flags.length ? `
+                            <div class="flags">
+                                <strong><i class="fas fa-exclamation-triangle"></i> ${safetyText}</strong>
+                                <ul class="safety-list">
+                                    ${opt.safety_flags.map(flag => `<li><i class="fas fa-chevron-right"></i> ${flag}</li>`).join('')}
+                                </ul>
+                            </div>` : ''}
+                        <div class="evidence">
+                            <strong><i class="fas fa-graduation-cap"></i> ${evidenceText}</strong>
+                            ${opt.evidence.map(ev => `
+                                <div class="evidence-item">
+                                    <div class="evidence-title"><i class="fas fa-book-medical"></i> ${ev.title}</div>
+                                    <div class="evidence-snippet">${ev.snippet}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>`;
+                });
+
+                // Create the PDF download button - positioned at the top
+                const pdfData = {
+                    patientName: data.patientName,
+                    symptoms: data.symptomTexts,
+                    symptomTexts: data.symptomTexts,
+                    age: data.age,
+                    sex: data.sex,
+                    weight: data.weight,
+                    height: data.height
+                };
+
+                const pdfButton = `
+                    <div style="text-align: center; margin: 2rem 0;">
+                        <a href="/assess?format=pdf&data=${encodeURIComponent(JSON.stringify(pdfData))}" 
+                           target="_blank" class="download-pdf-button">
+                            <i class="fas fa-file-pdf"></i> ${downloadPdfText}
+                        </a>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">
+                            <i class="fas fa-info-circle"></i> ${pdfInfoText}
+                        </p>
+                    </div>
+                `;
+                
+                html = pdfButton + html;
+            }
+
+            const importantNoteText = translations[currentLanguage].important_note || 'Important Clinical Note';
+            if (json.note) {
+                html += `<div class="option" style="border-left-color: var(--warning-color)">
+                    <div class="option-title"><i class="fas fa-info-circle"></i> ${importantNoteText}</div>
+                    <div class="option-rationale">${json.note}</div>
+                </div>`;
+            }
+
+            document.getElementById('result').innerHTML = html;
+        }
+
+        function getTranslatedText(key, fallback) {
+            return translations[currentLanguage] && translations[currentLanguage][key] 
+                ? translations[currentLanguage][key] 
+                : fallback;
+        }
+        
+        function showNotification(messageKey, type = 'info', fallbackMessage = null) {
+            // If messageKey is already a translated message, use it directly
+            // If it's a translation key, translate it
+            let message;
+            if (translations[currentLanguage] && translations[currentLanguage][messageKey]) {
+                message = translations[currentLanguage][messageKey];
+            } else {
+                message = fallbackMessage || messageKey;
+            }
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                border-radius: 12px;
+                color: white;
+                font-weight: 500;
+                z-index: 1000;
+                box-shadow: var(--shadow-lg);
+                animation: slideInRight 0.3s ease-out;
+            `;
+            
+            const colors = {
+                success: 'var(--success-color)',
+                error: 'var(--danger-color)',
+                warning: 'var(--warning-color)',
+                info: 'var(--primary-color)'
+            };
+            
+            const icons = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-triangle',
+                warning: 'fas fa-exclamation-circle',
+                info: 'fas fa-info-circle'
+            };
+            
+            notification.style.background = colors[type] || colors.info;
+            notification.innerHTML = `
+                <i class="${icons[type] || icons.info}"></i>
+                ${message}
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove notification after 4 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease-out';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 4000);
+        }
+
+        // Add CSS for notification animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOutRight {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Load symptoms when page loads
+        // Load patient data from session storage
+        function loadPatientData() {
+            console.log('🔍 Loading patient data...');
+            
+            try {
+                const patientSession = localStorage.getItem('patientSession');
+                console.log('📦 Raw patient session data:', patientSession);
+                
+                if (patientSession) {
+                    const sessionData = JSON.parse(patientSession);
+                    console.log('📋 Parsed session data:', sessionData);
+                    
+                    const patient = sessionData.patient;
+                    console.log('👤 Patient data:', patient);
+                    
+                    if (patient) {
+                        // Auto-fill patient information
+                        const patientNameField = document.getElementById('patientName');
+                        const ageField = document.getElementById('age');
+                        const genderField = document.getElementById('gender');
+                        
+                        console.log('🎯 Form fields found:', {
+                            patientNameField: !!patientNameField,
+                            ageField: !!ageField,
+                            genderField: !!genderField
+                        });
+                        
+                        if (patientNameField && patient.firstName && patient.lastName) {
+                            const fullName = `${patient.firstName} ${patient.lastName}`;
+                            patientNameField.value = fullName;
+                            patientNameField.readOnly = true;
+                            patientNameField.style.backgroundColor = '#f8f9fa';
+                            patientNameField.style.border = '2px solid #28a745';
+                            console.log('✅ Patient name set:', fullName);
+                        }
+                        
+                        // Calculate age from date of birth if available
+                        if (ageField && patient.dateOfBirth) {
+                            const today = new Date();
+                            const birthDate = new Date(patient.dateOfBirth);
+                            const age = Math.floor((today - birthDate) / (365.25 * 24 * 60 * 60 * 1000));
+                            ageField.value = age;
+                            console.log('✅ Age calculated and set:', age);
+                        }
+                        
+                        if (genderField && patient.gender) {
+                            genderField.value = patient.gender.toLowerCase();
+                            console.log('✅ Gender set:', patient.gender);
+                        }
+                        
+                        // Show patient session card
+                        showPatientSessionCard(patient, sessionData.loginTime);
+                        
+                        // Show patient session info in header
+                        showPatientSessionInfo(patient, sessionData.loginTime);
+                        
+                        // Show logout button
+                        updateLogoutButton();
+                        
+                        console.log('✅ Patient data loading completed successfully');
+                    } else {
+                        console.log('❌ No patient object found in session data');
+                    }
+                } else {
+                    console.log('❌ No patient session found in localStorage');
+                }
+            } catch (error) {
+                console.error('❌ Error loading patient data:', error);
+            }
+        }
+        
+        // Show patient session card with detailed information
+        function showPatientSessionCard(patient, loginTime) {
+            console.log('📋 Showing patient session card for:', patient);
+            
+            const sessionCard = document.getElementById('patientSessionCard');
+            const sessionDetails = document.getElementById('patientSessionDetails');
+            
+            console.log('🎯 Session card elements found:', {
+                sessionCard: !!sessionCard,
+                sessionDetails: !!sessionDetails
+            });
+            
+            if (sessionCard && sessionDetails) {
+                const loginDate = new Date(loginTime).toLocaleString();
+                
+                const detailsHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                        <div><strong>Name:</strong> ${patient.firstName} ${patient.lastName}</div>
+                        <div><strong>Email:</strong> ${patient.email}</div>
+                        <div><strong>Phone:</strong> ${patient.phone || 'Not provided'}</div>
+                        <div><strong>Gender:</strong> ${patient.gender ? patient.gender.charAt(0).toUpperCase() + patient.gender.slice(1) : 'Not specified'}</div>
+                        <div><strong>Village:</strong> ${patient.village || 'Not provided'}</div>
+                        <div><strong>Date of Birth:</strong> ${patient.dateOfBirth ? new Date(patient.dateOfBirth).toLocaleDateString() : 'Not provided'}</div>
+                        <div><strong>Emergency Contact:</strong> ${patient.emergencyContact || 'Not provided'}</div>
+                        <div><strong>Login Time:</strong> ${loginDate}</div>
+                    </div>
+                `;
+                
+                sessionDetails.innerHTML = detailsHTML;
+                sessionCard.style.display = 'block';
+                
+                console.log('✅ Patient session card displayed successfully');
+            } else {
+                console.error('❌ Could not find session card elements');
+            }
+        }
+        
+        // Show patient session information in header
+        function showPatientSessionInfo(patient, loginTime) {
+            const header = document.querySelector('.header-content');
+            if (header) {
+                // Create patient info badge
+                const patientInfo = document.createElement('div');
+                patientInfo.className = 'patient-session-info';
+                patientInfo.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 20px; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <i class="fas fa-user-check"></i>
+                        <span>Patient: ${patient.firstName} ${patient.lastName}</span>
+                        <span style="opacity: 0.8;">| ID: ${patient.id}</span>
+                    </div>
+                `;
+                
+                // Insert after the logo
+                const logo = header.querySelector('.logo');
+                if (logo && logo.nextSibling) {
+                    header.insertBefore(patientInfo, logo.nextSibling);
+                } else if (logo) {
+                    header.appendChild(patientInfo);
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLanguagePreference();
+            loadPatientData(); // Load patient data first
+            loadSymptoms();
+            
+            // Add test button for debugging (remove in production)
+            if (window.location.search.includes('debug=true')) {
+                addTestPatientData();
+            }
+        });
+        
+        // Test function to add sample patient data (for debugging)
+        function addTestPatientData() {
+            console.log('🧪 Adding test patient data...');
+            const testPatientData = {
+                patient: {
+                    id: 1,
+                    firstName: "John",
+                    lastName: "Doe",
+                    email: "john.doe@example.com",
+                    phone: "123-456-7890",
+                    gender: "male",
+                    village: "Test Village",
+                    dateOfBirth: "1990-01-01",
+                    address: "123 Test Street",
+                    emergencyContact: "Jane Doe",
+                    emergencyPhone: "987-654-3210"
+                },
+                loginTime: new Date().toISOString()
+            };
+            
+            localStorage.setItem('patientSession', JSON.stringify(testPatientData));
+            console.log('✅ Test patient data added');
+            
+            // Reload patient data
+            setTimeout(() => {
+                loadPatientData();
+            }, 100);
+        }
+        
+        // Logout function
+        function logoutPatient() {
+            if (confirm('Are you sure you want to logout? You will be redirected to the main application.')) {
+                console.log('🚪 Patient logout initiated...');
+                
+                // Clear patient session
+                localStorage.removeItem('patientSession');
+                
+                // Show logout message
+                alert('You have been logged out successfully.');
+                
+                // Redirect to main application
+                window.location.href = '/';
+            }
+        }
+        
+        // Show logout button if patient is logged in
+        function updateLogoutButton() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            const patientSession = localStorage.getItem('patientSession');
+            
+            if (logoutBtn) {
+                if (patientSession) {
+                    logoutBtn.style.display = 'block';
+                } else {
+                    logoutBtn.style.display = 'none';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

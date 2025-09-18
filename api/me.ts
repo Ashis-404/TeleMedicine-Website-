@@ -37,36 +37,41 @@ export default async function handler(req: any, res: any) {
     
     const conn = await getDbConnection();
     
-    // Get user data
-    const [users] = await conn.execute("SELECT * FROM users WHERE id=?", [decoded.id]);
-    const user = (users as any[])[0];
-    
-    if (!user) {
-      return res.status(404).json({ error: "user_not_found" });
+    try {
+      // Get user data
+      const [users] = await conn.execute("SELECT * FROM users WHERE id=?", [decoded.id]);
+      const user = (users as any[])[0];
+      
+      if (!user) {
+        return res.status(404).json({ error: "user_not_found" });
+      }
+      
+      let profile = null;
+      
+      // Get role-specific profile data
+      if (decoded.role === "patient") {
+        const [patients] = await conn.execute("SELECT * FROM patients WHERE user_id=?", [decoded.id]);
+        profile = (patients as any[])[0];
+      } else if (decoded.role === "doctor") {
+        const [doctors] = await conn.execute("SELECT * FROM doctors WHERE user_id=?", [decoded.id]);
+        profile = (doctors as any[])[0];
+      } else if (decoded.role === "healthworker") {
+        const [healthworkers] = await conn.execute("SELECT * FROM healthworkers WHERE user_id=?", [decoded.id]);
+        profile = (healthworkers as any[])[0];
+      }
+      
+      res.status(200).json({ 
+        ok: true, 
+        user, 
+        profile,
+        timestamp: new Date().toISOString()
+      });
+      
+    } finally {
+      await conn.end();
     }
     
-    let profile = null;
-    
-    // Get role-specific profile data
-    if (decoded.role === "patient") {
-      const [patients] = await conn.execute("SELECT * FROM patients WHERE user_id=?", [decoded.id]);
-      profile = (patients as any[])[0];
-    } else if (decoded.role === "doctor") {
-      const [doctors] = await conn.execute("SELECT * FROM doctors WHERE user_id=?", [decoded.id]);
-      profile = (doctors as any[])[0];
-    } else if (decoded.role === "healthworker") {
-      const [healthworkers] = await conn.execute("SELECT * FROM healthworkers WHERE user_id=?", [decoded.id]);
-      profile = (healthworkers as any[])[0];
-    }
-    
-    res.status(200).json({ 
-      ok: true, 
-      user, 
-      profile,
-      timestamp: new Date().toISOString()
-    });
-    
-  } catch (error) {
+  } catch (error: any) {
     if (error.name === 'JsonWebTokenError') {
       return res.status(401).json({ error: 'invalid_token' });
     }
