@@ -69,6 +69,39 @@ export async function ensureTablesExist() {
       )
     `);
 
+    // Create doctor_profiles table
+    await conn.execute(`
+      CREATE TABLE IF NOT EXISTS doctor_profiles (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL UNIQUE,
+        name VARCHAR(100) NOT NULL,
+        specialization VARCHAR(100) DEFAULT 'General Practice',
+        employee_id VARCHAR(50) NOT NULL UNIQUE,
+        license_number VARCHAR(50) NULL,
+        experience_years INT DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+      )
+    `);
+
+    // Create healthworker_profiles table
+    await conn.execute(`
+      CREATE TABLE IF NOT EXISTS healthworker_profiles (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL UNIQUE,
+        name VARCHAR(100) NOT NULL,
+        department VARCHAR(100) DEFAULT 'General Health',
+        employee_id VARCHAR(50) NOT NULL UNIQUE,
+        certification VARCHAR(100) NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+      )
+    `);
+
     console.log('✅ Database tables verified/created');
     
   } catch (error) {

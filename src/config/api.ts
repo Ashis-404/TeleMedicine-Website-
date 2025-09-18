@@ -2,10 +2,8 @@
 const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const isProduction = !isDevelopment;
 
-// Base API URL - in development use localhost, in production use current domain
-export const API_BASE_URL = isDevelopment 
-  ? 'http://localhost:4000/api' 
-  : '/api';
+// Base API URL - use relative paths in all environments for Vercel compatibility
+export const API_BASE_URL = '/api';
 
 // API endpoints
 export const API_ENDPOINTS = {
