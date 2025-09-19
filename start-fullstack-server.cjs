@@ -1,26 +1,26 @@
 #!/usr/bin/env node
-// start-backend-server.cjs - Start the Node.js/Express backend server
+// start-fullstack-server.cjs - Start the TeleMedicine servers
 
 const { spawn } = require('child_process');
 const path = require('path');
 
-console.log('🚀 Starting TeleMedicine Backend Server...\n');
+console.log('🚀 Starting TeleMedicine Fullstack Server...\n');
 
-// Start Express API server
-function startBackend() {
-  console.log('🔧 Starting Express API server on port 4000...');
+// Start Mock API server (more reliable for development)
+function startMockAPI() {
+  console.log('🔧 Starting Mock API server on port 3001...');
   
-  const backendProcess = spawn('npx', ['ts-node-dev', '--esm', 'src/server.ts'], {
+  const mockProcess = spawn('node', ['mock-api-server.cjs'], {
     stdio: 'inherit',
     shell: true
   });
 
-  backendProcess.on('error', (error) => {
-    console.error('❌ Failed to start backend server:', error.message);
-    console.log('📝 Make sure dependencies are installed: npm install');
+  mockProcess.on('error', (error) => {
+    console.error('❌ Failed to start mock API server:', error.message);
+    console.log('📝 Make sure mock-api-server.cjs exists');
   });
 
-  return backendProcess;
+  return mockProcess;
 }
 
 // Start Vite frontend server
@@ -42,16 +42,16 @@ function startFrontend() {
 
 // Start both servers
 function startServers() {
-  const backendProcess = startBackend();
+  const mockProcess = startMockAPI();
   
-  // Wait a bit for backend to start
+  // Wait a bit for mock API to start
   setTimeout(() => {
     const frontendProcess = startFrontend();
     
     // Handle graceful shutdown
     process.on('SIGINT', () => {
       console.log('\n🛑 Shutting down servers...');
-      backendProcess.kill('SIGINT');
+      mockProcess.kill('SIGINT');
       frontendProcess.kill('SIGINT');
       process.exit(0);
     });
@@ -59,11 +59,12 @@ function startServers() {
     console.log('\n✅ Both servers are starting...');
     console.log('📋 Access points:');
     console.log('   🌐 Frontend: http://localhost:5173 (or next available port)');
-    console.log('   🔧 Backend API: http://localhost:4000');
-    console.log('   🔐 Auth Endpoints: http://localhost:4000/api/auth/*');
-    console.log('   🏥 Health Check: http://localhost:4000/api/health');
+    console.log('   🔧 Mock API: http://localhost:3001');
+    console.log('   🔐 Auth Endpoints: http://localhost:3001/api/auth/*');
+    console.log('   🏥 Health Check: http://localhost:3001/api/health');
+    console.log('\n💡 Using Mock API for development (no database required)');
     
   }, 2000);
 }
 
-startServers().catch(console.error);
+startServers();
